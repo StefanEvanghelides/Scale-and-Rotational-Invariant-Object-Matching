@@ -40,7 +40,7 @@
 *.x86_64
 *.hex
 
-#PGM files
+# PGM files
 *.pgm
 
 # Debug files
