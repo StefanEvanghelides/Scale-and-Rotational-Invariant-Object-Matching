@@ -5,11 +5,10 @@
 
 
 int main(int argc, char** argv) {
-	
 	PGMImage image;
 	
-	readPGM("mask", &image);
-	writePGM("mask_saved", &image);
+	readPGM("mask.pgm", &image);
+	writePGM("mask_saved.pgm", &image);
 	
 	return 0;
 }

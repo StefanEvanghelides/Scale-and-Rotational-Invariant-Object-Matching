@@ -2,10 +2,10 @@
 #define PGM_IO_H
 
 typedef struct PGMImage {
-  int maxVal;
   int width;
   int height;
-  char** data;
+  int maxVal;
+  int** data;
 } PGMImage;
 
   
