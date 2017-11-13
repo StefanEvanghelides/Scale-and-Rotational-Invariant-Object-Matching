@@ -27,6 +27,6 @@ CHAPTER 2: Backlog
         
     2. Drawing the contour
         o Research: isoline algorithm
-        o Application: drawing the contour of a given mask
+        o Application: drawing the contour of a given object
         
     3. (to be completed)
