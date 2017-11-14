@@ -21,12 +21,16 @@ CHAPTER 1: Project Description
     
 CHAPTER 2: Backlog
 
-    1. Introduction
-        o Reading PGM files
-        o Writing PGM files
+    1. Introduction - COMPLETED - Nov 14 2017
+        o Reading PGM files - COMPLETED - Nov 13 2017
+        o Writing PGM files - COMPLETED - Nov 14 2017
         
     2. Drawing the contour
-        o Research: isoline algorithm
-        o Application: drawing the contour of a given object
+        o Research: Isoline algorithm and Marching Squares
+        o Application: Drawing the contour of a given object (mask)
+        o Application 2: Drawing the contour of all objects on an image
         
-    3. (to be completed)
+    3. Correlation
+        o Same scale and rotation
+        o Different scales
+        o Different rotation degrees
