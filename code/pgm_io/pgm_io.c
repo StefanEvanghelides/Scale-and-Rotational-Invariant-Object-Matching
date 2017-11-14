@@ -3,14 +3,15 @@
 #include <string.h>
 #include "pgm_io.h"
 
-/* Read PGM file. */
+/* Read PGM file. 
+   This function consideres the *img variable uninitialized.*/
 void readPGM (char filename[], PGMImage *img) {
 	FILE *file;
 	unsigned char ch;
 	int row,col,type;
 	
 	/* Open file. */
-	file = fopen(filename, "r");
+	file = fopen(filename, "rb");
 	if(file == NULL) {
 		fprintf(stderr, "Error: Unable to open file %s.\n\n", filename);
 		exit(-1);
@@ -24,8 +25,8 @@ void readPGM (char filename[], PGMImage *img) {
 	}
 	ch = getc(file); // here is an integer represented as char 48 == '0'
 	type = ch - 48;
-	if(type != 5) {
-		fprintf(stderr, "Error: Only P5 PGM files supported.\n\n");
+	if(type != 5 && type != 2) {
+		fprintf(stderr, "Error: Only P5 and P2 PGM files supported.\n\n");
 		exit(-1);
 	}
 	
@@ -34,7 +35,7 @@ void readPGM (char filename[], PGMImage *img) {
     while (ch = getc(file) == '#') {
       while (ch = getc(file) != '\n');         
     }
-	fseek(file, 0, SEEK_CUR); /* Windows solution. Will test on Unix as well.*/
+	fseek(file, -1, SEEK_CUR); /* Windows solution. Will test on Unix as well.*/
 	
 	/* Read PGM image's width, height and maximum value */
 	fprintf(stdout, "Reading image...\n");
@@ -61,11 +62,40 @@ void readPGM (char filename[], PGMImage *img) {
 	
 	/* Close file. */
 	fclose(file);
-	fprintf(stdout, "Finished reading the file.\n");
+	fprintf(stdout, "Finished reading the file.\n\n");
 }
 
 
-/* Write PGM file. */
+/* Write PGM file. 
+   Prerequisite: *img variable must be initialized.*/
 void writePGM(char filename[], PGMImage *img) {
+	FILE *file;
+	int row, col;
+	unsigned char ch;
 	
+	/* Open file. */
+	file = fopen(filename, "wb");
+	if(file == NULL) {
+		fprintf(stderr, "Error: Unable to open file %s.\n\n", filename);
+		exit(-1);
+	}
+	
+	/* Writing image's details. */
+	fprintf(stdout, "Writing the image in P5 format...\n");
+	fprintf(file, "P5\n");
+	fprintf(file, "# Creator: Stefan Evanghelides\n");
+	fprintf(file, "%d %d\n", img->width, img->height);
+	fprintf(file, "%d\n", img->maxVal);
+	
+	/* Writing image's data. */
+	for(row = 0; row < img->height; row++) {
+		for(col = 0; col < img->width; col++) {
+			ch = (unsigned char) img->data[row][col];
+			fprintf(file, "%c", ch);
+		}
+	}
+	
+	/* Close file. */
+	fclose(file);
+	fprintf(stdout, "Finished writing the image.\n");
 }
