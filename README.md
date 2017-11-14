@@ -22,7 +22,7 @@ CHAPTER 1: Project Description
 CHAPTER 2: Backlog
 
     1. Introduction - COMPLETED - Nov 14 2017
-        o Reading PGM files - COMPLETED - Nov 12 2017
+        o Reading PGM files - COMPLETED - Nov 13 2017
         o Writing PGM files - COMPLETED - Nov 14 2017
         
     2. Drawing the contour
