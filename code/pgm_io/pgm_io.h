@@ -7,14 +7,11 @@ typedef struct PGMImage {
   int maxVal;
   int** data;
 } PGMImage;
-
   
-/***prototypes**********************************************************/
-/***********************************************************************/
-  
-void readPGM (char filename[], PGMImage *img);
-void writePGM(char filename[], PGMImage *img);
-
+/* Prototypes. */
+PGMImage initializePGMImage(int width, int height, int maxVal);
+PGMImage readPGM (char filename[]);
+void writePGM(char filename[], PGMImage image);
 
 #endif
  
