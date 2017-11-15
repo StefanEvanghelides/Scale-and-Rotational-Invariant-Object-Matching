@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "pgm_io/pgm_io.h"
+#include "isoline/isoline.h"
 
 /* This function creates the negative of a grayscale PGM image. */
 void negative(PGMImage *img) {
