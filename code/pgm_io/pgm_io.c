@@ -3,12 +3,31 @@
 #include <string.h>
 #include "pgm_io.h"
 
-/* Read PGM file. 
-   This function consideres the *img variable uninitialized.*/
-void readPGM (char filename[], PGMImage *img) {
+/* Initialize the PGM function. */
+PGMImage initializePGMImage(int width, int height, int maxVal) {
+	PGMImage image;
+	int row, col;
+	
+	image.width = width;
+	image.height = height;
+	image.maxVal = maxVal;
+	
+	/* Initialize 2D array for reading the data.*/
+	image.data = malloc(height * sizeof(int*));
+	image.data[0] = malloc(width * height * sizeof(int*));
+	for(row = 1; row < height; row++) {
+		image.data[row] = image.data[row-1] + image.width;
+	}
+	
+	return image;
+}
+
+/* Read PGM file. */
+PGMImage readPGM (char filename[]) {
+	PGMImage image;
 	FILE *file;
-	unsigned char ch;
 	int row,col,type;
+	int width, height, maxVal;
 	
 	/* Open file. */
 	file = fopen(filename, "rb");
@@ -18,60 +37,49 @@ void readPGM (char filename[], PGMImage *img) {
 	}
 	
 	/* Get the type of file. */
-	ch = getc(file);
-	if(ch != 'P') {
-		fprintf(stderr, "Error: Not a valid PGM file.\n\n");
-		exit(-1);
-	}
-	ch = getc(file); // here is an integer represented as char 48 == '0'
-	type = ch - 48;
-	if(type != 5 && type != 2) {
-		fprintf(stderr, "Error: Only P5 and P2 PGM files supported.\n\n");
+	if(getc(file) != 'P' && getc(file) != '5') {
+		fprintf(stderr, "Error: Not a valid P5 type PGM file.\n\n");
 		exit(-1);
 	}
 	
 	/* Skip comments and new line characters. */
-	while(ch = getc(file) != '\n');
-    while (ch = getc(file) == '#') {
-      while (ch = getc(file) != '\n');         
+	while(getc(file) != '\n');
+    while (getc(file) == '#') {
+      while (getc(file) != '\n');         
     }
-	fseek(file, -1, SEEK_CUR); /* Windows solution. Will test on Unix as well.*/
+	fseek(file, -1, SEEK_CUR);
 	
 	/* Read PGM image's width, height and maximum value */
 	fprintf(stdout, "Reading image...\n");
-	fscanf(file, "%d", &(img->width));
-	fscanf(file, "%d", &(img->height));
-	fscanf(file, "%d", &(img->maxVal));
-	fprintf(stdout, "Width=%d  Height=%d  MaxVal=%d\n", img->width, img->height, img->maxVal);
+	fscanf(file, "%d", &width);
+	fscanf(file, "%d", &height);
+	fscanf(file, "%d", &maxVal);
+	fprintf(stdout, "Width=%d  Height=%d  MaxVal=%d\n", width, height, maxVal);
 	
-	/* Initialize 2D array for reading the data.*/
-	img->data = malloc(img->height * sizeof(int*));
-	img->data[0] = malloc(img->width * img->height * sizeof(int*));
-	for(row = 1; row < img->height; row++) {
-		img->data[row] = img->data[row-1] + img->width;
-	}
+	/* Initialize the PGM image. */
+	image = initializePGMImage(width, height, maxVal);
 	
 	/* Reading the data. */
 	while(getc(file) != '\n'); 
-	for(row = 0; row < img->height; row++) {
-		for(col = 0; col < img->width; col++) {
-			ch = getc(file);
-			img->data[row][col] = ch;
+	for(row = 0; row < height; row++) {
+		for(col = 0; col < width; col++) {
+			image.data[row][col] = getc(file);
 		}
 	}
 	
 	/* Close file. */
 	fclose(file);
 	fprintf(stdout, "Finished reading the file.\n\n");
+	
+	return image;
 }
 
 
 /* Write PGM file. 
    Prerequisite: *img variable must be initialized.*/
-void writePGM(char filename[], PGMImage *img) {
+void writePGM(char filename[], PGMImage image) {
 	FILE *file;
 	int row, col;
-	unsigned char ch;
 	
 	/* Open file. */
 	file = fopen(filename, "wb");
@@ -84,14 +92,13 @@ void writePGM(char filename[], PGMImage *img) {
 	fprintf(stdout, "Writing the image in P5 format...\n");
 	fprintf(file, "P5\n");
 	fprintf(file, "# Creator: Stefan Evanghelides\n");
-	fprintf(file, "%d %d\n", img->width, img->height);
-	fprintf(file, "%d\n", img->maxVal);
+	fprintf(file, "%d %d\n", image.width, image.height);
+	fprintf(file, "%d\n", image.maxVal);
 	
 	/* Writing image's data. */
-	for(row = 0; row < img->height; row++) {
-		for(col = 0; col < img->width; col++) {
-			ch = (unsigned char) img->data[row][col];
-			fprintf(file, "%c", ch);
+	for(row = 0; row < image.height; row++) {
+		for(col = 0; col < image.width; col++) {
+			fprintf(file, "%c", (unsigned char) image.data[row][col]);
 		}
 	}
 	

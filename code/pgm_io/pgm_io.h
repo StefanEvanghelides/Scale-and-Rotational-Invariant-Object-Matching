@@ -10,9 +10,9 @@ typedef struct PGMImage {
 } PGMImage;
   
 /* Prototypes. */
-void readPGM (char filename[], PGMImage *img);
-void writePGM(char filename[], PGMImage *img);
-
+PGMImage initializePGMImage(int width, int height, int maxVal);
+PGMImage readPGM (char filename[]);
+void writePGM(char filename[], PGMImage image);
 
 #endif
  
