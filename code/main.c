@@ -18,7 +18,8 @@ void negative(PGMImage *image) {
 int main(int argc, char** argv) {
 	
 	PGMImage image = readPGM("mask.pgm");
-	writePGM("mask_saved.pgm", image);
+	PGMImage contour = applyThreshold(image, 145);
+	writePGM("mask_contour.pgm", contour);
 	
 	return 0;
 }
