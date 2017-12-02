@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "pgm_io.h"
+#include "pgm.h"
 
 /* Initialize the PGM function. */
 PGMImage initializePGMImage(int type, int width, int height, int maxVal) {
@@ -124,8 +124,13 @@ void writePGM(PGMImage image, char filename[]) {
 		}
 	}
 	
-	
 	/* Close file. */
 	fclose(file);
 	fprintf(stdout, "Finished writing the image.\n");
+}
+
+/* Free the PGM image from memory. */
+void freePGM(PGMImage image) {
+	free(image.data[0]);
+	free(image.data);
 }

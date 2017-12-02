@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include "../pgm_io/pgm_io.h"
+#include "../pgm/pgm.h"
+#include "array.h"
 #include "isoline.h"
+
 
 int getAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int threshold) {
 	return 0;
@@ -21,11 +23,14 @@ bool isEdge(int topLeft, int topRight, int bottomLeft, int bottomRight, int thre
    These angles are based on the relative position of the threshold,
    applied to a group of 2X2 pixels.
    (see Marching Squares algorithm)  */
-int *createContour(PGMImage image, int threshold) {
+Array createContour(PGMImage image, int threshold) {
 	int row,col;
 	int topLeft, topRight, bottomLeft, bottomRight;
-	int *angles = NULL;
-	
+	Array angles;
+
+	initArray(&angles, 64); /* Initializes the array with the size 64. */
+
+
 	int count = 0;
 	for(row = 0; row < image.height - 1; row++) {
 		for(col = 0; col < image.width - 1; col++) {
@@ -36,8 +41,10 @@ int *createContour(PGMImage image, int threshold) {
 
 			if(isEdge(topLeft, topRight, bottomLeft, bottomRight, threshold)) {
 				count++;
-				fprintf(stdout, "Edge on top left position (%d,%d)\n", row, col);
 				int angle = getAngle(topLeft, topRight, bottomLeft, bottomRight, threshold);
+				angle += 1;
+				fprintf(stdout, "Edge on top left position (%d,%d); Angle=%d\n", row, col, angle);
+				addElement(&angles, angle);
 			}
 
 		}
