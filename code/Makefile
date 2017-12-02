@@ -1,5 +1,5 @@
 CC=gcc 
-CFLAGS=-Wall -lm
+CFLAGS=-Wall -std=c99 -lm
 
 HEADERS = pgm_io/pgm_io.h isoline/isoline.h
 OBJECTS = main.o pgm_io/pgm_io.o isoline/isoline.o

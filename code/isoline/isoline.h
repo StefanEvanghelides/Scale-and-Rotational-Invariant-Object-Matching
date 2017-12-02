@@ -2,9 +2,9 @@
 #define ISOLINE_H
 
 /* Prototypes. */
-PGMImage applyThreshold(PGMImage image, int threshold);
-int getContourCase(int topLeft, int topRight, int bottomLeft, int bottomRight);
-PGMImage createContour(PGMImage image);
+int getAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int threshold);
+bool isEdge(int topLeft, int topRight, int bottomLeft, int bottomRight, int threshold);
+int *createContour(PGMImage image, int threshold);
 
 #endif
  
