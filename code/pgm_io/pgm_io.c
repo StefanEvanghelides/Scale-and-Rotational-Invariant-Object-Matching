@@ -4,10 +4,11 @@
 #include "pgm_io.h"
 
 /* Initialize the PGM function. */
-PGMImage initializePGMImage(int width, int height, int maxVal) {
+PGMImage initializePGMImage(int type, int width, int height, int maxVal) {
 	PGMImage image;
-	int row, col;
+	int row;
 	
+	image.type = type;
 	image.width = width;
 	image.height = height;
 	image.maxVal = maxVal;
@@ -26,9 +27,10 @@ PGMImage initializePGMImage(int width, int height, int maxVal) {
 PGMImage readPGM (char filename[]) {
 	PGMImage image;
 	FILE *file;
-	int row,col,type;
+	int row, col, next_value;
 	int width, height, maxVal;
-	
+	char type[2]; /* For Types P2 and P5. */
+
 	/* Open file. */
 	file = fopen(filename, "rb");
 	if(file == NULL) {
@@ -37,8 +39,12 @@ PGMImage readPGM (char filename[]) {
 	}
 	
 	/* Get the type of file. */
-	if(getc(file) != 'P' && getc(file) != '5') {
-		fprintf(stderr, "Error: Not a valid P5 type PGM file.\n\n");
+	fprintf(stdout, "Reading image...\n");
+	type[0] = getc(file);
+	type[1] = getc(file);
+	fprintf(stdout, "Type=%s\n", type);
+	if(!(type[0] == 'P' && (type[1] == '2' || type[1] == '5'))) {
+		fprintf(stderr, "Error: Not a valid P2 or P5 type PGM file.\n\n"); 
 		exit(-1);
 	}
 	
@@ -50,20 +56,28 @@ PGMImage readPGM (char filename[]) {
 	fseek(file, -1, SEEK_CUR);
 	
 	/* Read PGM image's width, height and maximum value */
-	fprintf(stdout, "Reading image...\n");
 	fscanf(file, "%d", &width);
 	fscanf(file, "%d", &height);
 	fscanf(file, "%d", &maxVal);
 	fprintf(stdout, "Width=%d  Height=%d  MaxVal=%d\n", width, height, maxVal);
 	
 	/* Initialize the PGM image. */
-	image = initializePGMImage(width, height, maxVal);
+	image = initializePGMImage(atoi(type+1), width, height, maxVal);
 	
 	/* Reading the data. */
-	while(getc(file) != '\n'); 
-	for(row = 0; row < height; row++) {
-		for(col = 0; col < width; col++) {
-			image.data[row][col] = getc(file);
+	while(getc(file) != '\n');
+	if(image.type == 5) {
+		for(row = 0; row < height; row++) {
+			for(col = 0; col < width; col++) {
+				image.data[row][col] = getc(file);
+			}
+		}
+	} else { /* So type is P2 */
+		for(row = 0; row < height; row++) {
+			for(col = 0; col < width; col++) {
+				fscanf(file, "%d", &next_value);
+				image.data[row][col] = next_value;
+			}
 		}
 	}
 	
@@ -77,7 +91,7 @@ PGMImage readPGM (char filename[]) {
 
 /* Write PGM file. 
    Prerequisite: *img variable must be initialized.*/
-void writePGM(char filename[], PGMImage image) {
+void writePGM(PGMImage image, char filename[]) {
 	FILE *file;
 	int row, col;
 	
@@ -89,18 +103,27 @@ void writePGM(char filename[], PGMImage image) {
 	}
 	
 	/* Writing image's details. */
-	fprintf(stdout, "Writing the image in P5 format...\n");
-	fprintf(file, "P5\n");
+	fprintf(stdout, "Writing the image in P%d format...\n", image.type);
+	fprintf(file, "P%d\n", image.type);
 	fprintf(file, "# Creator: Stefan Evanghelides\n");
 	fprintf(file, "%d %d\n", image.width, image.height);
 	fprintf(file, "%d\n", image.maxVal);
 	
 	/* Writing image's data. */
-	for(row = 0; row < image.height; row++) {
-		for(col = 0; col < image.width; col++) {
-			fprintf(file, "%c", (unsigned char) image.data[row][col]);
+	if(image.type == 5) {
+		for(row = 0; row < image.height; row++) {
+			for(col = 0; col < image.width; col++) {
+				fprintf(file, "%c", (unsigned char) image.data[row][col]);
+			}
+		}
+	} else { /* So type is P2. */
+		for(row = 0; row < image.height; row++) {
+			for(col = 0; col < image.width; col++) {
+				fprintf(file, "%d\n", image.data[row][col]);
+			}
 		}
 	}
+	
 	
 	/* Close file. */
 	fclose(file);

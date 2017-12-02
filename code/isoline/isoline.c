@@ -8,7 +8,7 @@
    into a b/w picture based on a certain threshold. */
 PGMImage applyThreshold(PGMImage image, int threshold) {
 	int row, col;
-	PGMImage binaryImage = initializePGMImage(image.width, image.height, 1);
+	PGMImage binaryImage = initializePGMImage(image.type, image.width, image.height, 1);
 	
 	for(row = 0; row < binaryImage.height; row++) {
 		for(col = 0; col < binaryImage.width; col++) {
@@ -42,7 +42,7 @@ int getContourCase(int topLeft, int topRight, int bottomLeft, int bottomRight) {
    This will result in a black and white PGM image,
    in which the contour is black and the background is white.  */
 PGMImage createContour(PGMImage image) {
-	PGMImage contour = initializePGMImage(image.width-1, image.height-1, 15);
+	PGMImage contour = initializePGMImage(image.type, image.width-1, image.height-1, 15);
 	int row,col;
 	int topLeft, topRight, bottomLeft, bottomRight;
 	int contourCase; /* This is a value between 0 and 15. */
