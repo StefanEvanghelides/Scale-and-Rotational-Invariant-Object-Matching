@@ -129,6 +129,29 @@ void writePGM(PGMImage image, char filename[]) {
 	fprintf(stdout, "Finished writing the image.\n");
 }
 
+/* Prints Image on the standard output. */
+void printImage(PGMImage image) {
+	int row, col, nextValue;
+	
+	fprintf(stdout, "Printing Image...\n");
+	fprintf(stdout, "Type=P%d, ", image.type);
+	fprintf(stdout, "Width=%d, ", image.width);
+	fprintf(stdout, "Height=%d, ", image.height);
+	fprintf(stdout, "MxVal=%d\n", image.maxVal);
+	fprintf(stdout, "Data:\n");
+
+	for(row = 0; row < image.height; row++) {
+		for(col = 0; col < image.width; col++) {
+			nextValue = image.data[row][col];
+			if(nextValue < 100) fprintf(stdout, " ");
+			if(nextValue < 10)  fprintf(stdout, " ");
+			fprintf(stdout, "%d ", nextValue);
+		}
+		fprintf(stdout, "\n");
+	}
+	fprintf(stdout, "\n");
+}
+
 /* Free the PGM image from memory. */
 void freePGM(PGMImage image) {
 	free(image.data[0]);

@@ -5,13 +5,13 @@
 typedef struct {
 	int length;
 	int maxSize;
-	int *data;
+	double *data;
 } Array;
 
 /* Prototypes. */
 void initArray(Array *array, int size);
 void doubleSize(Array *array);
-void addElement(Array *array, int element);
+void addElement(Array *array, double element);
 void printArray(Array array);
 void freeArray(Array array);
 

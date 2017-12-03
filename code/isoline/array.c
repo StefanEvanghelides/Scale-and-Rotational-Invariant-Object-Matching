@@ -6,18 +6,18 @@
 void initArray(Array *array, int size) {
 	array->length = 0;
 	array->maxSize = size;
-	array->data = calloc(size, sizeof(int));
+	array->data = calloc(size, sizeof(double));
 }
 
 /* Doubles the maximum size of the array. */
 void doubleSize(Array *array) {
 	int newSize = array->maxSize * 2;
-	array->data  = realloc(array->data, newSize*sizeof(int));	
+	array->data  = realloc(array->data, newSize*sizeof(double));	
 	array->maxSize = newSize;
 }
 
 /* Adds an element to the array. If the array is full, its size is doubled. */
-void addElement(Array *array, int element) {
+void addElement(Array *array, double element) {
 	if(array->length == array->maxSize) {
 		doubleSize(array);
 	}
@@ -26,10 +26,11 @@ void addElement(Array *array, int element) {
 }
 
 void printArray(Array array) {
+	fprintf(stdout, "Array data:\n");
 	for(int i = 0; i < array.length; i++) {
-		fprintf(stdout, "%d ", array.data[i], i);
+		fprintf(stdout, "%.2f ", array.data[i]);
 	}
-	fprintf(stdout, "\n");
+	fprintf(stdout, "\n\n");
 }
 
 /* Free Array's memory. */

@@ -6,16 +6,6 @@
 #include "isoline/array.h"
 #include "isoline/isoline.h"
 
-void printImage(PGMImage image) {
-	int row, col;
-	for(row = 0; row < image.height; row++) {
-		for(col = 0; col < image.width; col++) {
-			fprintf(stdout, "%d ", image.data[row][col]);
-		}
-		fprintf(stdout, "\n");
-	}
-}
-
 int main(int argc, char** argv) {
 	
 	/* Read the PGM Image. */
