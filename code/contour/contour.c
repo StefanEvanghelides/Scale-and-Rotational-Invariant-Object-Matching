@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include "../pgm/pgm.h"
 #include "array.h"
-#include "isoline.h"
+#include "contour.h"
 
 /* Returns the angle of the current square and sets the direction for the new square. */
 double getAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int threshold, int *firstPoint) {

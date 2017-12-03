@@ -1,8 +1,8 @@
 CC=gcc 
 CFLAGS=-Wall -std=c99 -lm
 
-HEADERS = pgm/pgm.h isoline/isoline.h isoline/array.h
-OBJECTS = main.o pgm/pgm.o isoline/isoline.o isoline/array.o
+HEADERS = pgm/pgm.h contour/contour.h contour/array.h
+OBJECTS = main.o pgm/pgm.o contour/contour.o contour/array.o
 
 default: RUN
 

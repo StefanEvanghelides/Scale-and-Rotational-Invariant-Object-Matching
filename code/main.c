@@ -3,8 +3,8 @@
 #include <string.h>
 #include <stdbool.h>
 #include "pgm/pgm.h"
-#include "isoline/array.h"
-#include "isoline/isoline.h"
+#include "contour/array.h"
+#include "contour/contour.h"
 
 int main(int argc, char** argv) {
 	

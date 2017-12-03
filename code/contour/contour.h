@@ -1,5 +1,5 @@
-#ifndef ISOLINE_H
-#define ISOLINE_H
+#ifndef CONTOUR_H
+#define CONTOUR_H
 
 /* Direction macros. */
 #define UP 1
