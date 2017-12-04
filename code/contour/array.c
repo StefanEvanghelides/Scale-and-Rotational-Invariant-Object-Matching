@@ -26,11 +26,11 @@ void addElement(Array *array, double element) {
 }
 
 void printArray(Array array) {
-	fprintf(stdout, "Array data:\n");
-	for(int i = 0; i < array.length; i++) {
-		fprintf(stdout, "%.2f ", array.data[i]);
+	fprintf(stdout, "Array data:\n[");
+	for(int i = 0; i < array.length - 1; i++) {
+		fprintf(stdout, "%.2f, ", array.data[i]);
 	}
-	fprintf(stdout, "\n\n");
+	fprintf(stdout, "%.2f]\n\n", array.data[array.length - 1]);
 }
 
 /* Free Array's memory. */

@@ -2,6 +2,7 @@
 #define CONTOUR_H
 
 /* Direction macros. */
+#define NONE 0
 #define UP 1
 #define RIGHT 2
 #define DOWN -1
