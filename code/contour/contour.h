@@ -8,6 +8,9 @@
 #define DOWN -1
 #define LEFT -2
 
+/* Pi */
+#define pi 3.14159265358979323846
+
 /* Only createContour function must be externalized. */
 Array createContour(PGMImage image, int threshold);
 

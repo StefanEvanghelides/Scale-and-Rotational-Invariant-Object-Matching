@@ -135,8 +135,82 @@ int getSecondPoint(int topLeft, int topRight, int bottomLeft, int bottomRight, i
 	return secondPoint;
 }
 
-/* Returns the angle of the current square and sets the direction for the new square. */
-double getAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int threshold, int *firstPoint) {
+double getAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int threshold, int firstPoint, int secondPoint) {
+	double angle = 0.0;
+	double normFirst, normSecond, delta;
+
+	switch(firstPoint) {
+		case UP:
+			normFirst = fabs(topRight - threshold) / fabs(topRight - topLeft);
+			if (secondPoint == DOWN) {
+				normSecond = fabs(bottomRight - threshold) / fabs(bottomRight - bottomLeft);
+				delta = normFirst - normSecond;
+				angle = atan2(-1, delta);
+			} else if (secondPoint == LEFT) {
+				normFirst = 1 - normFirst;
+				normSecond = fabs(topLeft - threshold) / fabs(bottomLeft - topLeft);
+				angle = atan2(-normSecond, -normFirst);
+			} else {
+				normSecond = fabs(topRight - threshold) / fabs(topRight - bottomRight);
+				angle = atan2(-normSecond, normFirst);
+			}
+			break;
+
+		case DOWN:
+			normFirst = fabs(bottomRight - threshold) / fabs(bottomRight - bottomLeft);
+			if (secondPoint == UP) {
+				normSecond = fabs(topRight - threshold) / fabs(topRight - topLeft);
+				delta = normFirst - normSecond;
+				angle = atan2(1, delta);
+			} else if (secondPoint == LEFT) {
+				normFirst = 1 - normFirst;
+				normSecond = fabs(bottomLeft - threshold) / fabs(bottomLeft - topLeft);
+				angle = atan2(normSecond, -normFirst);
+			} else {
+				normSecond = fabs(bottomRight - threshold) / fabs(topRight - bottomRight);
+				angle = atan2(normSecond, normFirst);
+			}
+			break;
+
+		case LEFT:
+			normFirst = fabs(topLeft - threshold) / fabs(bottomLeft - topLeft);
+			if (secondPoint == RIGHT) {
+				normSecond = fabs(topRight - threshold) / fabs(topRight - bottomRight);
+				delta = normFirst - normSecond;
+				angle = atan2(delta, 1);
+			} else if (secondPoint == UP) {
+				normSecond = fabs(topLeft - threshold) / fabs(topLeft - topRight);
+				angle = atan2(normFirst, normSecond);
+			} else {
+				normFirst = 1 - normFirst;
+				normSecond = fabs(bottomLeft - threshold) / fabs(bottomLeft - bottomRight);
+				angle = atan2(-normFirst, normSecond);
+			}
+			break;
+
+		case RIGHT:
+			normFirst = fabs(topRight - threshold) / fabs(bottomRight - topRight);
+			if (secondPoint == LEFT) {
+				normSecond = fabs(topLeft - threshold) / fabs(topLeft - bottomLeft);
+				delta = normFirst - normSecond;
+				angle = atan2(delta, -1);
+			} else if (secondPoint == UP) {
+				normSecond = fabs(topRight - threshold) / fabs(topLeft - topRight);
+				angle = atan2(normFirst, -normSecond);
+			} else {
+				normFirst = 1 - normFirst;
+				normSecond = fabs(bottomRight - threshold) / fabs(bottomLeft - bottomRight);
+				angle = atan2(-normFirst, -normSecond);
+			}
+			break;
+
+	}
+
+	return angle;
+}
+
+/* Computes the angle of the current square and sets the direction for the new square. */
+double computeAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int threshold, int *firstPoint) {
 	int secondPoint; /* Should take values: UP, Right, DOWN, LEFT. */
 	double angle = 0.0;
 
@@ -149,11 +223,14 @@ double getAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int 
 
 	secondPoint = getSecondPoint(topLeft, topRight, bottomLeft, bottomRight, threshold, *firstPoint);
 
-
 	printPointDirection(*firstPoint);
 	fprintf(stdout, " -> ");
 	printPointDirection(secondPoint);
 	fprintf(stdout, "\n");
+
+
+	/* Compute the angle. */
+	angle = getAngle(topLeft, topRight, bottomLeft, bottomRight, threshold, *firstPoint, secondPoint);
 
 	*firstPoint = secondPoint;
 
@@ -225,10 +302,8 @@ void findStartingSquareLocation(PGMImage image, int threshold, int *startX, int 
 	}
 }
 
-/* This function will create the contour of an object,
-   which will be represented as an 1D array of angles.
-   These angles are based on the relative position of the threshold,
-   applied to a group of 2X2 pixels.
+/* This function will create the contour of an object, which will be represented as an 1D array of angles.
+   These angles are based on the relative position of the threshold, applied to a group of 2X2 pixels.
    (see Marching Squares algorithm)  */
 Array createContour(PGMImage image, int threshold) {
 	int row, col, count;
@@ -262,7 +337,7 @@ Array createContour(PGMImage image, int threshold) {
 		bottomLeft  = image.data[row+1][col];    
 		bottomRight = image.data[row+1][col+1]; 
 
-		currentAngle = getAngle(topLeft, topRight, bottomLeft, bottomRight, threshold, &firstPoint);
+		currentAngle = computeAngle(topLeft, topRight, bottomLeft, bottomRight, threshold, &firstPoint);
 
 		fprintf(stdout, "Edge on the Square with the Top Left position (%d,%d); Angle=%lf\n\n", row, col, currentAngle);
 		
