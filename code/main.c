@@ -6,10 +6,9 @@
 #include "contour/array.h"
 #include "contour/contour.h"
 
-int main(int argc, char** argv) {
-	
+void launch(char* filename) {
 	/* Read the PGM Image. */
-	PGMImage image = readPGM("mask.pgm");
+	PGMImage image = readPGM(filename);
 
 	/* Print the values on the standard output. */
 	printImage(image);
@@ -26,6 +25,15 @@ int main(int argc, char** argv) {
 	/* Free memory. */
 	freeArray(angles);
 	freePGM(image);
+}
+
+int main(int argc, char** argv) {
+	if(argc < 2) {
+		fprintf(stderr, "ERROR: Missing the name of the file!\nUsage: ./RUN <file_name>\n\n");
+		exit(-1);
+	}
+
+	launch(argv[1]);
 
 	return 0;
 }
