@@ -7,6 +7,7 @@
 #include "array.h"
 #include "contour.h"
 
+/* Prints the direction of the point as a string */
 void printPointDirection(int point) {
 	switch(point) {
 		case UP:
@@ -24,25 +25,24 @@ void printPointDirection(int point) {
 	}
 }
 
-/* Returns the angle of the current square and sets the direction for the new square. */
-double getAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int threshold, int *firstPoint) {
-	int secondPoint; /* Should take values: UP, Right, DOWN, LEFT. */
-	double angle = 0.0;
+/* Returns the position of the first point. The expected values are: UP, LEFT or DOWN. */
+int getFirstPoint(int topLeft, int topRight, int bottomLeft, int bottomRight, int threshold) {
+	int firstPoint;
 
-	*firstPoint *= -1;
+	if(bottomRight < threshold) {
+		firstPoint = DOWN;
+		if (bottomLeft < threshold) firstPoint = LEFT;
+		else if (topRight < threshold) firstPoint = UP;
+	} else if (topRight < threshold) firstPoint = UP;
 
-	if(*firstPoint == NONE) { /* This is the first edge. */
-		/* The expected values are: UP, LEFT, DOWN. */
-		if(bottomRight < threshold) {
-			*firstPoint = DOWN;
-			if (bottomLeft < threshold) *firstPoint = LEFT;
-			else if (topRight < threshold) *firstPoint = UP;
-		} else if (topRight < threshold) *firstPoint = UP;
+	return firstPoint;
+}
 
-		fprintf(stdout, "Starting FirstPoint = %d\n\n", *firstPoint);
-	}
+/* Returns the second point, based on the first point and the 4 corners of the square. */
+int getSecondPoint(int topLeft, int topRight, int bottomLeft, int bottomRight, int threshold, int firstPoint) {
+	int secondPoint;
 
-	switch(*firstPoint) { /* Get the second point. */
+	switch(firstPoint) {
 		case UP:
 			if(topLeft < threshold) {
 				if (bottomLeft < threshold && bottomRight < threshold) secondPoint = RIGHT;
@@ -132,6 +132,24 @@ double getAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int 
 			break;
 	}
 
+	return secondPoint;
+}
+
+/* Returns the angle of the current square and sets the direction for the new square. */
+double getAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int threshold, int *firstPoint) {
+	int secondPoint; /* Should take values: UP, Right, DOWN, LEFT. */
+	double angle = 0.0;
+
+	*firstPoint *= -1;
+
+	if(*firstPoint == NONE) {
+		*firstPoint = getFirstPoint(topLeft, topRight, bottomLeft, bottomRight, threshold);
+		fprintf(stdout, "Starting FirstPoint = %d\n\n", *firstPoint);
+	}
+
+	secondPoint = getSecondPoint(topLeft, topRight, bottomLeft, bottomRight, threshold, *firstPoint);
+
+
 	printPointDirection(*firstPoint);
 	fprintf(stdout, " -> ");
 	printPointDirection(secondPoint);
@@ -177,32 +195,23 @@ bool isInBounds(int row, int col, int height, int width) {
 	return (row>=0 && row<height && col>=0 && col<width);
 }
 
-/* This function will create the contour of an object,
-   which will be represented as an 1D array of angles.
-   These angles are based on the relative position of the threshold,
-   applied to a group of 2X2 pixels.
-   (see Marching Squares algorithm)  */
-Array createContour(PGMImage image, int threshold) {
-	int row = 0, col = 0, count = 0;
+/* Finds the location of the starting square, holding the coordinates of the top left corner. */
+void findStartingSquareLocation(PGMImage image, int threshold, int *startX, int *startY) {
+	int row, col;
 	int topLeft, topRight, bottomLeft, bottomRight;
-	int startX = -1, startY = -1, firstPoint = NONE;
-	bool stop = false;
-	double currentAngle;
-	Array angles;
+	bool stop;
 
-	initArray(&angles, 64); /* Initializes the array with the size 64. */
-
-	/* Find starting square. */
+	row = 0; col = 0; stop = false;
 	while(row < image.height - 1) {
 		while(col < image.width - 1) {
-			topLeft = image.data[row][col];         
-			topRight = image.data[row][col+1];      
-			bottomLeft = image.data[row+1][col];    
+			topLeft     = image.data[row][col];         
+			topRight    = image.data[row][col+1];      
+			bottomLeft  = image.data[row+1][col];    
 			bottomRight = image.data[row+1][col+1];
 
 			if(isEdge(topLeft, topRight, bottomLeft, bottomRight, threshold)) {
-				startX = row;
-				startY = col;
+				*startX = row;
+				*startY = col;
 				stop = true;
 				break;
 			}
@@ -214,22 +223,43 @@ Array createContour(PGMImage image, int threshold) {
 		col = 0;
 		row++;
 	}
+}
+
+/* This function will create the contour of an object,
+   which will be represented as an 1D array of angles.
+   These angles are based on the relative position of the threshold,
+   applied to a group of 2X2 pixels.
+   (see Marching Squares algorithm)  */
+Array createContour(PGMImage image, int threshold) {
+	int row, col, count;
+	int topLeft, topRight, bottomLeft, bottomRight;
+	int startX, startY, firstPoint;
+	double currentAngle;
+	Array angles;
+
+	/* Initializes the array with the size 64. */
+	initArray(&angles, 64); 
+	
+	/* Find starting square. */
+	findStartingSquareLocation(image, threshold, &startX, &startY);
 
 	/* No edge detected. Stop the program. */
-	if(startX == -1 && startY == -1) { 
+	if(!isInBounds(startX, startY, image.height, image.width)) { 
 		fprintf(stderr, "No edge detected. Cannot compute contour!\n\n");
 		exit(-1);
 	}
 
+	/* Walk along the contour, storing the angles of each edge. */
+	row = startX; col = startY; count = 0; firstPoint = NONE;
 	do {
 		if(count > image.width * image.height) { /* No cycle. just break without error. */
 			fprintf(stdout, "WARNING: No cycle detected!\n\n");
 			break;
 		}
 
-		topLeft = image.data[row][col];         
-		topRight = image.data[row][col+1];      
-		bottomLeft = image.data[row+1][col];    
+		topLeft     = image.data[row][col];         
+		topRight    = image.data[row][col+1];      
+		bottomLeft  = image.data[row+1][col];    
 		bottomRight = image.data[row+1][col+1]; 
 
 		currentAngle = getAngle(topLeft, topRight, bottomLeft, bottomRight, threshold, &firstPoint);
@@ -241,7 +271,7 @@ Array createContour(PGMImage image, int threshold) {
 		count++;
 	} while(!reachedStartingPoint(row, col, startX, startY) && isInBounds(row, col, image.height, image.width));
 
-	fprintf(stdout, "\nCount = %d\n\n", count);
+	fprintf(stdout, "Count = %d\n\n", count);
 
 	return angles;
 }

@@ -20,6 +20,9 @@ int main(int argc, char** argv) {
 	/* Print array. */
 	printArray(angles);
 
+	/* Print the sum. */
+	sum(angles);
+
 	/* Free memory. */
 	freeArray(angles);
 	freePGM(image);

@@ -14,6 +14,7 @@ void doubleSize(Array *array);
 void addElement(Array *array, double element);
 void printArray(Array array);
 void freeArray(Array array);
+void sum(Array array);
 
 #endif
  

@@ -8,11 +8,7 @@
 #define DOWN -1
 #define LEFT -2
 
-/* Prototypes. */
-double getAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int threshold, int *firstPoint);
-bool isEdge(int topLeft, int topRight, int bottomLeft, int bottomRight, int threshold);
-bool reachedStartingPoint(int row, int col, int startX, int startY);
-bool isInBounds(int row, int col, int height, int width);
+/* Only createContour function must be externalized. */
 Array createContour(PGMImage image, int threshold);
 
 #endif
