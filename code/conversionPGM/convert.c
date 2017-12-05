@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../pgm_io/pgm_io.c"
+#include "../pgm/pgm.h"
 
 char *getFilename(char* initialFilename, int newType) {
 	int length = strlen(initialFilename);
@@ -13,11 +13,12 @@ char *getFilename(char* initialFilename, int newType) {
 		filename[i] = initialFilename[i];
 	}
 
-	/* Add extension for the new type. */
+	/* Add extra info regarding the new type. */
 	filename[length - 4] = '_';
 	filename[length - 3] = 'P';
 	filename[length - 2] = newType + '0';
 	
+	/* Finish by adding the extension. */
 	for(i=length-4; i<length; i++) {
 		filename[i+3] = initialFilename[i];
 	}

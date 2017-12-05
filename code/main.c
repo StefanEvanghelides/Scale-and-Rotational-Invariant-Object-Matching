@@ -6,9 +6,15 @@
 #include "contour/array.h"
 #include "contour/contour.h"
 
-void launch(char* filename) {
+int main(int argc, char** argv) {
+	/* Check argumetns. */
+	if(argc < 2) {
+		fprintf(stderr, "ERROR: Missing the name of the file!\nUsage: ./RUN <file_name>\n\n");
+		exit(-1);
+	}
+
 	/* Read the PGM Image. */
-	PGMImage image = readPGM(filename);
+	PGMImage image = readPGM(argv[1]);
 
 	/* Print the values on the standard output. */
 	printImage(image);
@@ -25,15 +31,6 @@ void launch(char* filename) {
 	/* Free memory. */
 	freeArray(angles);
 	freePGM(image);
-}
-
-int main(int argc, char** argv) {
-	if(argc < 2) {
-		fprintf(stderr, "ERROR: Missing the name of the file!\nUsage: ./RUN <file_name>\n\n");
-		exit(-1);
-	}
-
-	launch(argv[1]);
 
 	return 0;
 }
