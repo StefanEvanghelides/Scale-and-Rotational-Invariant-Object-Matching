@@ -135,6 +135,71 @@ int getSecondPoint(int topLeft, int topRight, int bottomLeft, int bottomRight, i
 	return secondPoint;
 }
 
+/* Returns the coordinates for finding the next square. */
+void findNextSquare(int direction, int *row, int *col) {
+	switch(direction) {
+		case UP:
+			(*row)--;
+			break;
+		case RIGHT:
+			(*col)++;
+			break;
+		case DOWN:
+			(*row)++;
+			break;
+		case LEFT:
+			(*col)--;
+			break;
+	}
+}
+
+/* Checks whether the 4 pixels form an edge. */
+bool isEdge(int topLeft, int topRight, int bottomLeft, int bottomRight, int threshold) {
+	return ((topLeft<threshold || topRight<threshold || bottomLeft<threshold || bottomRight<threshold)
+		&& !(topLeft>threshold && topRight>threshold && bottomLeft>threshold && bottomRight>threshold)
+		&& !(topLeft<threshold && topRight<threshold && bottomLeft<threshold && bottomRight<threshold));
+}
+
+/* Checks if the algorithm reached the starting point. */
+bool reachedStartingPoint(int row, int col, int startX, int startY) {
+	return (startX != -1 && startY != -1 && row == startX && col == startY);
+}
+
+/* Checks whether the values of row and col are within the limits. */
+bool isInBounds(int row, int col, int height, int width) {
+	return (row>=0 && row<height && col>=0 && col<width);
+}
+
+/* Finds the location of the starting square, holding the coordinates of the top left corner. */
+void findStartingSquareLocation(PGMImage image, int threshold, int *startX, int *startY) {
+	int row, col;
+	int topLeft, topRight, bottomLeft, bottomRight;
+	bool stop;
+
+	row = 0; col = 0; stop = false;
+	while(row < image.height - 1) {
+		while(col < image.width - 1) {
+			topLeft     = image.data[row][col];         
+			topRight    = image.data[row][col+1];      
+			bottomLeft  = image.data[row+1][col];    
+			bottomRight = image.data[row+1][col+1];
+
+			if(isEdge(topLeft, topRight, bottomLeft, bottomRight, threshold)) {
+				*startX = row;
+				*startY = col;
+				stop = true;
+				break;
+			}
+			col++;
+		}
+
+		if(stop) break;
+
+		col = 0;
+		row++;
+	}
+}
+
 double getAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int threshold, int firstPoint, int secondPoint) {
 	double angle = 0.0;
 	double normFirst, normSecond, delta;
@@ -209,98 +274,6 @@ double getAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int 
 	return angle;
 }
 
-/* Computes the angle of the current square and sets the direction for the new square. */
-double computeAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int threshold, int *firstPoint) {
-	int secondPoint; /* Should take values: UP, Right, DOWN, LEFT. */
-	double angle = 0.0;
-
-	*firstPoint *= -1;
-
-	if(*firstPoint == NONE) {
-		*firstPoint = getFirstPoint(topLeft, topRight, bottomLeft, bottomRight, threshold);
-		fprintf(stdout, "Starting FirstPoint = %d\n\n", *firstPoint);
-	}
-
-	secondPoint = getSecondPoint(topLeft, topRight, bottomLeft, bottomRight, threshold, *firstPoint);
-
-	printPointDirection(*firstPoint);
-	fprintf(stdout, " -> ");
-	printPointDirection(secondPoint);
-	fprintf(stdout, "\n");
-
-
-	/* Compute the angle. */
-	angle = getAngle(topLeft, topRight, bottomLeft, bottomRight, threshold, *firstPoint, secondPoint);
-
-	*firstPoint = secondPoint;
-
-	return angle;
-}
-
-/* Returns the coordinates for finding the next square. */
-void getNextSquare(int direction, int *row, int *col) {
-	switch(direction) {
-		case UP:
-			(*row)--;
-			break;
-		case RIGHT:
-			(*col)++;
-			break;
-		case DOWN:
-			(*row)++;
-			break;
-		case LEFT:
-			(*col)--;
-			break;
-	}
-}
-
-/* Checks whether the 4 pixels form an edge. */
-bool isEdge(int topLeft, int topRight, int bottomLeft, int bottomRight, int threshold) {
-	return ((topLeft<threshold || topRight<threshold || bottomLeft<threshold || bottomRight<threshold)
-		&& !(topLeft>threshold && topRight>threshold && bottomLeft>threshold && bottomRight>threshold)
-		&& !(topLeft<threshold && topRight<threshold && bottomLeft<threshold && bottomRight<threshold));
-}
-
-/* Checks if the algorithm reached the starting point. */
-bool reachedStartingPoint(int row, int col, int startX, int startY) {
-	return (startX != -1 && startY != -1 && row == startX && col == startY);
-}
-
-/* Checks whether the values of row and col are within the limits. */
-bool isInBounds(int row, int col, int height, int width) {
-	return (row>=0 && row<height && col>=0 && col<width);
-}
-
-/* Finds the location of the starting square, holding the coordinates of the top left corner. */
-void findStartingSquareLocation(PGMImage image, int threshold, int *startX, int *startY) {
-	int row, col;
-	int topLeft, topRight, bottomLeft, bottomRight;
-	bool stop;
-
-	row = 0; col = 0; stop = false;
-	while(row < image.height - 1) {
-		while(col < image.width - 1) {
-			topLeft     = image.data[row][col];         
-			topRight    = image.data[row][col+1];      
-			bottomLeft  = image.data[row+1][col];    
-			bottomRight = image.data[row+1][col+1];
-
-			if(isEdge(topLeft, topRight, bottomLeft, bottomRight, threshold)) {
-				*startX = row;
-				*startY = col;
-				stop = true;
-				break;
-			}
-			col++;
-		}
-
-		if(stop) break;
-
-		col = 0;
-		row++;
-	}
-}
 
 /* This function will create the contour of an object, which will be represented as an 1D array of angles.
    These angles are based on the relative position of the threshold, applied to a group of 2X2 pixels.
@@ -308,7 +281,7 @@ void findStartingSquareLocation(PGMImage image, int threshold, int *startX, int 
 Array createContour(PGMImage image, int threshold) {
 	int row, col, count;
 	int topLeft, topRight, bottomLeft, bottomRight;
-	int startX, startY, firstPoint;
+	int startX, startY, firstPoint, secondPoint;
 	double currentAngle;
 	Array angles;
 
@@ -325,28 +298,34 @@ Array createContour(PGMImage image, int threshold) {
 	}
 
 	/* Walk along the contour, storing the angles of each edge. */
-	row = startX; col = startY; count = 0; firstPoint = NONE;
+	row = startX; col = startY; count = 1; firstPoint = NONE; secondPoint = NONE;
 	do {
-		if(count > image.width * image.height) { /* No cycle. just break without error. */
-			fprintf(stdout, "WARNING: No cycle detected!\n\n");
-			break;
-		}
-
 		topLeft     = image.data[row][col];         
 		topRight    = image.data[row][col+1];      
 		bottomLeft  = image.data[row+1][col];    
 		bottomRight = image.data[row+1][col+1]; 
 
-		currentAngle = computeAngle(topLeft, topRight, bottomLeft, bottomRight, threshold, &firstPoint);
+		/* Compute the first point (if it was not already computed).
+		   Otherwise, the first point will become the flipped version of the (previous) second point.*/
+		if(firstPoint == NONE) {
+			firstPoint = getFirstPoint(topLeft, topRight, bottomLeft, bottomRight, threshold);
+			fprintf(stdout, "Starting FirstPoint = %d\n\n", firstPoint);
+		} else firstPoint = secondPoint * (-1); 
 
-		fprintf(stdout, "Edge on the Square with the Top Left position (%d,%d); Angle=%lf\n\n", row, col, currentAngle);
-		
+		secondPoint = getSecondPoint(topLeft, topRight, bottomLeft, bottomRight, threshold, firstPoint);
+
+		currentAngle = getAngle(topLeft, topRight, bottomLeft, bottomRight, threshold, firstPoint, secondPoint);
 		addElement(&angles, currentAngle);
-		getNextSquare(firstPoint, &row, &col);
-		count++;
-	} while(!reachedStartingPoint(row, col, startX, startY) && isInBounds(row, col, image.height, image.width));
 
-	fprintf(stdout, "Count = %d\n\n", count);
+		printPointDirection(firstPoint);
+		fprintf(stdout, " -> ");
+		printPointDirection(secondPoint);
+		fprintf(stdout, "\nEdge no. %d on position (%d,%d); Angle=%lf\n\n", count, row, col, currentAngle);
+	
+		findNextSquare(secondPoint, &row, &col);
+
+	} while(!reachedStartingPoint(row, col, startX, startY) && isInBounds(row, col, image.height, image.width)
+		&& (++count) < image.height * image. width);
 
 	return angles;
 }
