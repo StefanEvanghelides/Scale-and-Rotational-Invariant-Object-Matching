@@ -1,24 +1,36 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "pgm_io/pgm_io.h"
-
-/* This function creates the negative of a grayscale PGM image. */
-void negative(PGMImage *image) {
-	int row, col;
-	unsigned char ch;
-	for(row=0; row<image->height; row++) {
-		for(col=0; col<image->width; col++) {
-			ch = (image->data[row][col] + 127) % 256;
-			image->data[row][col] = ch;
-		}
-	}
-}
+#include <stdbool.h>
+#include "pgm/pgm.h"
+#include "contour/array.h"
+#include "contour/contour.h"
 
 int main(int argc, char** argv) {
-	
-	PGMImage image = readPGM("mask.pgm");
-	writePGM("mask_saved.pgm", image);
-	
+	/* Check argumetns. */
+	if(argc < 2) {
+		fprintf(stderr, "ERROR: Missing the name of the file!\nUsage: ./RUN <file_name>\n\n");
+		exit(-1);
+	}
+
+	/* Read the PGM Image. */
+	PGMImage image = readPGM(argv[1]);
+
+	/* Print the values on the standard output. */
+	printImage(image);
+
+	/* For now, the threshold will be 142. */
+	Array angles = createContour(image, 142);
+
+	/* Print array. */
+	printArray(angles);
+
+	/* Print the sum. */
+	sum(angles);
+
+	/* Free memory. */
+	freeArray(angles);
+	freePGM(image);
+
 	return 0;
 }
