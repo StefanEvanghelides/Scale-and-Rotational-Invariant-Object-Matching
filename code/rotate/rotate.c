@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
 	char *filename = getFilename(argv[1], image.type);
 
 	/* Save the current image. */
-	writePGM(image, filename);
+	writePGM(rotated, filename);
 
 	/* Free memory. */
 	freePGM(image);
