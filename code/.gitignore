@@ -41,6 +41,8 @@
 *.hex
 RUN
 CONVERT
+ROTATE
+tests/
 
 # PGM files
 *.pgm

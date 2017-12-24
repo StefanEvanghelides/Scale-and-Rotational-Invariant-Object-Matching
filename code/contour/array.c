@@ -33,11 +33,10 @@ void printArray(Array array) {
 	fprintf(stdout, "%.2f]\n\n", array.data[array.length - 1]);
 }
 
-void sum(Array array) {
+double getArraySum(Array array) {
 	double sum = 0;
-	fprintf(stdout, "Sum Angles = ");
 	for(int i = 0; i < array.length; i++) sum += array.data[i];
-	fprintf(stdout, "%.2f\n\n", sum);
+	return sum;
 }
 
 /* Free Array's memory. */
