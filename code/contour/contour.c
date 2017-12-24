@@ -209,7 +209,7 @@ double getAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int 
 	switch(firstPoint) {
 		case UP:
 			normFirst = fabs(topRight - threshold) / fabs(topRight - topLeft);
-			if (secondPoint == DOWN) {
+			if (secondPoint == DOWN) { /** REQUIRES HOTFIX **/
 				normSecond = fabs(bottomRight - threshold) / fabs(bottomRight - bottomLeft);
 				delta = normFirst - normSecond;
 				angle = atan2(-1, delta);
@@ -225,7 +225,7 @@ double getAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int 
 
 		case DOWN:
 			normFirst = fabs(bottomRight - threshold) / fabs(bottomRight - bottomLeft);
-			if (secondPoint == UP) {
+			if (secondPoint == UP) {/** REQUIRES HOTFIX **/
 				normSecond = fabs(topRight - threshold) / fabs(topRight - topLeft);
 				delta = normFirst - normSecond;
 				angle = atan2(1, delta);
@@ -241,7 +241,7 @@ double getAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int 
 
 		case LEFT:
 			normFirst = fabs(topLeft - threshold) / fabs(bottomLeft - topLeft);
-			if (secondPoint == RIGHT) {
+			if (secondPoint == RIGHT) {/** REQUIRES HOTFIX **/
 				normSecond = fabs(topRight - threshold) / fabs(topRight - bottomRight);
 				delta = normFirst - normSecond;
 				angle = atan2(delta, 1);
@@ -257,7 +257,7 @@ double getAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int 
 
 		case RIGHT:
 			normFirst = fabs(topRight - threshold) / fabs(bottomRight - topRight);
-			if (secondPoint == LEFT) {
+			if (secondPoint == LEFT) {/** REQUIRES HOTFIX **/
 				normSecond = fabs(topLeft - threshold) / fabs(topLeft - bottomLeft);
 				delta = normFirst - normSecond;
 				angle = atan2(delta, -1);
