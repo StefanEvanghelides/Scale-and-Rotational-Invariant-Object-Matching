@@ -7,6 +7,8 @@
 #include "array.h"
 #include "contour.h"
 
+#define PI 3.14159265358979323846
+
 /* Prints the direction of the point as a string */
 void printPointDirection(int point) {
 	switch(point) {
@@ -282,8 +284,8 @@ Array createContour(PGMImage image, int threshold) {
 	int row, col, count;
 	int topLeft, topRight, bottomLeft, bottomRight;
 	int startX, startY, firstPoint, secondPoint;
-	double currentAngle;
-	Array angles;
+	double currentAngle, delta, circle;
+	Array angles, deltaAngles;
 
 	/* Initializes the array with the size 64. */
 	initArray(&angles, 64); 
@@ -315,6 +317,7 @@ Array createContour(PGMImage image, int threshold) {
 		secondPoint = getSecondPoint(topLeft, topRight, bottomLeft, bottomRight, threshold, firstPoint);
 
 		currentAngle = getAngle(topLeft, topRight, bottomLeft, bottomRight, threshold, firstPoint, secondPoint);
+
 		addElement(&angles, currentAngle);
 
 		printPointDirection(firstPoint);
@@ -327,5 +330,27 @@ Array createContour(PGMImage image, int threshold) {
 	} while(!reachedStartingPoint(row, col, startX, startY) && isInBounds(row, col, image.height, image.width)
 		&& (++count) < image.height * image. width);
 
-	return angles;
+	/* 1. Having the array of angles, compute the array of delta's. */
+	initArray(&deltaAngles, angles.length);
+	addElement(&deltaAngles, angles.data[0]);
+	for(int idx = 1; idx < angles.length; idx++) {
+		delta = angles.data[idx] - angles.data[idx-1];
+		addElement(&deltaAngles, delta);
+	}
+	freeArray(angles);
+
+	/* 2. Smooth the Angles, normalize in the (-pi, pi) range. */
+	for(int idx = 0; idx < deltaAngles.length; idx++) {
+		if(deltaAngles.data[idx] > PI) deltaAngles.data[idx] -= 2 * PI;
+		if(deltaAngles.data[idx] < -PI) deltaAngles.data[idx] += 2 * PI;
+	}
+
+	/* 3. We need to "add a circle" to the given function. */ 
+	circle = getArraySum(deltaAngles)/deltaAngles.length;
+	fprintf(stdout, "Circle = %.8f\n", circle);
+	for(int idx = 0; idx < deltaAngles.length; idx++) {
+		deltaAngles.data[idx] -= circle;
+	}
+
+	return deltaAngles;
 }

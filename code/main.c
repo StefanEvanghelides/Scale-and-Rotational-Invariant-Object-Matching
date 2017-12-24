@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
 	printArray(angles);
 
 	/* Print the sum. */
-	sum(angles);
+	fprintf(stdout, "Sum Angles = %.2f\n\n", getArraySum(angles));
 
 	/* Free memory. */
 	freeArray(angles);
