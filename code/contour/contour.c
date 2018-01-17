@@ -320,11 +320,13 @@ Array createContour(PGMImage image, int threshold) {
 
 		addElement(&angles, currentAngle);
 
+		#if 0 /* Verbose direction of the contour, used only for debugging. */
 		printPointDirection(firstPoint);
 		fprintf(stdout, " -> ");
 		printPointDirection(secondPoint);
 		fprintf(stdout, "\nEdge no. %d on position (%d,%d); Angle=%lf\n\n", count, row, col, currentAngle);
-	
+		#endif
+
 		findNextSquare(secondPoint, &row, &col);
 
 	} while(!reachedStartingPoint(row, col, startX, startY) && isInBounds(row, col, image.height, image.width)
