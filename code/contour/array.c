@@ -26,7 +26,7 @@ void addElement(Array *array, double element) {
 }
 
 void printArray(Array array) {
-	fprintf(stdout, "Array data:\n[");
+	fprintf(stdout, "[");
 	for(int i = 0; i < array.length - 1; i++) {
 		fprintf(stdout, "%.2f, ", array.data[i]);
 	}

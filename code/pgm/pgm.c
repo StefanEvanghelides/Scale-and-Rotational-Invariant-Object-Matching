@@ -39,10 +39,8 @@ PGMImage readPGM (char filename[]) {
 	}
 	
 	/* Get the type of file. */
-	fprintf(stdout, "Reading image...\n");
 	type[0] = getc(file);
 	type[1] = getc(file);
-	fprintf(stdout, "Type=%s\n", type);
 	if(!(type[0] == 'P' && (type[1] == '2' || type[1] == '5'))) {
 		fprintf(stderr, "Error: Not a valid P2 or P5 type PGM file.\n\n"); 
 		exit(-1);
@@ -59,7 +57,6 @@ PGMImage readPGM (char filename[]) {
 	fscanf(file, "%d", &width);
 	fscanf(file, "%d", &height);
 	fscanf(file, "%d", &maxVal);
-	fprintf(stdout, "Width=%d  Height=%d  MaxVal=%d\n", width, height, maxVal);
 	
 	/* Initialize the PGM image. */
 	image = initializePGMImage(atoi(type+1), width, height, maxVal);
@@ -83,7 +80,6 @@ PGMImage readPGM (char filename[]) {
 	
 	/* Close file. */
 	fclose(file);
-	fprintf(stdout, "Finished reading the file.\n\n");
 	
 	return image;
 }
@@ -103,7 +99,6 @@ void writePGM(PGMImage image, char filename[]) {
 	}
 	
 	/* Writing image's details. */
-	fprintf(stdout, "Writing the image in P%d format...\n", image.type);
 	fprintf(file, "P%d\n", image.type);
 	fprintf(file, "# Creator: Stefan Evanghelides\n");
 	fprintf(file, "%d %d\n", image.width, image.height);
@@ -126,7 +121,6 @@ void writePGM(PGMImage image, char filename[]) {
 	
 	/* Close file. */
 	fclose(file);
-	fprintf(stdout, "Finished writing the image.\n");
 }
 
 /* Prints Image on the standard output. */

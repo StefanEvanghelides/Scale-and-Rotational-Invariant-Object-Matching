@@ -311,7 +311,6 @@ Array createContour(PGMImage image, int threshold) {
 		   Otherwise, the first point will become the flipped version of the (previous) second point.*/
 		if(firstPoint == NONE) {
 			firstPoint = getFirstPoint(topLeft, topRight, bottomLeft, bottomRight, threshold);
-			fprintf(stdout, "Starting FirstPoint = %d\n\n", firstPoint);
 		} else firstPoint = secondPoint * (-1); 
 
 		secondPoint = getSecondPoint(topLeft, topRight, bottomLeft, bottomRight, threshold, firstPoint);
