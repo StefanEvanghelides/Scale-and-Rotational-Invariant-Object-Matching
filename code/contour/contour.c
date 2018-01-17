@@ -284,7 +284,7 @@ Array createContour(PGMImage image, int threshold) {
 	int row, col, count;
 	int topLeft, topRight, bottomLeft, bottomRight;
 	int startX, startY, firstPoint, secondPoint;
-	double currentAngle, delta, circle;
+	double currentAngle, delta;
 	Array angles, deltaAngles;
 
 	/* Initializes the array with the size 64. */
@@ -337,19 +337,13 @@ Array createContour(PGMImage image, int threshold) {
 		delta = angles.data[idx] - angles.data[idx-1];
 		addElement(&deltaAngles, delta);
 	}
+	addElement(&deltaAngles, angles.data[0]);
 	freeArray(angles);
 
 	/* 2. Smooth the Angles, normalize in the (-pi, pi) range. */
 	for(int idx = 0; idx < deltaAngles.length; idx++) {
 		if(deltaAngles.data[idx] > PI) deltaAngles.data[idx] -= 2 * PI;
 		if(deltaAngles.data[idx] < -PI) deltaAngles.data[idx] += 2 * PI;
-	}
-
-	/* 3. We need to "add a circle" to the given function. */ 
-	circle = getArraySum(deltaAngles)/deltaAngles.length;
-	fprintf(stdout, "Circle = %.8f\n", circle);
-	for(int idx = 0; idx < deltaAngles.length; idx++) {
-		deltaAngles.data[idx] -= circle;
 	}
 
 	return deltaAngles;
