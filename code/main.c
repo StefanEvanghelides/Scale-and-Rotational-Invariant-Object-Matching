@@ -8,8 +8,21 @@
 #include "correlation/correlation.h"
 
 
+Array flattenImage(char *filename, char *thresholdString) {
+	int threshold = (int) strtol(thresholdString, NULL, 10);
+	if(threshold < 1 || threshold > 255) {
+		fprintf(stderr, "Invalid Threshold! Threshold = %d\n\n", threshold);
+		exit(-1);
+	}
+
+	PGMImage image = readPGM(filename);
+	Array contour = createContour(image, threshold);
+	freePGM(image);
+
+	return contour;
+}
+
 int main(int argc, char** argv) {
-	PGMImage image;
 	Array anglesF1T1, anglesF2T2;
 
 	/* Check arguments. If they fail, exit the program with -1 code.*/
@@ -24,26 +37,12 @@ int main(int argc, char** argv) {
 
 	/* Checks the arguments for the first file and threshold. */
 	if(argc >= 3) {
-		int t1 = (int) strtol(argv[2], NULL, 10);
-		if(t1 < 1 || t1 > 255) {
-			fprintf(stderr, "Invalid Threshold! Threshold T1 = %d\n\n", t1);
-			exit(-1);
-		}
-
-		image = readPGM(argv[1]);
-		anglesF1T1 = createContour(image, t1);
+		anglesF1T1 = flattenImage(argv[1], argv[2]);
 		fprintf(stdout, "%s:\n", argv[1]); printArray(anglesF1T1);
 
 		/* Check the arguments for the second file and threshold (optional). */
 		if(argc == 5) {
-			int t2 = (int) strtol(argv[4], NULL, 10);
-			if(t2 < 1 || t2 > 255) {
-				fprintf(stderr, "Invalid Threshold! Threshold T2 = %d\n\n", t2);
-				exit(-1);
-			}
-			freePGM(image); // clean the space used by the old picture
-			image = readPGM(argv[3]);
-			anglesF2T2 = createContour(image, t2);
+			anglesF2T2 = flattenImage(argv[3], argv[4]);
 			fprintf(stdout, "%s:\n", argv[3]); printArray(anglesF2T2);
 
 			/* Correlation with Pearson Correlator. */
@@ -53,7 +52,6 @@ int main(int argc, char** argv) {
 
 		freeArray(anglesF1T1);
 		freeArray(anglesF2T2);
-		freePGM(image);
 	}
 
 	return 0;
