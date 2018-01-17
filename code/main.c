@@ -5,9 +5,13 @@
 #include "pgm/pgm.h"
 #include "contour/array.h"
 #include "contour/contour.h"
+#include "correlation/correlation.h"
 
 
 int main(int argc, char** argv) {
+	PGMImage image;
+	Array anglesF1T1, anglesF2T2;
+
 	/* Check arguments. If they fail, exit the program with -1 code.*/
 	if(argc != 3 &&  argc != 5) {
 		fprintf(stderr, "ERROR: Could not run the program!\n\n"
@@ -26,31 +30,30 @@ int main(int argc, char** argv) {
 			exit(-1);
 		}
 
-		PGMImage image = readPGM(argv[1]);
-		Array angles = createContour(image, t1);
-		fprintf(stdout, "%s:\n", argv[1]); printArray(angles);
-
-		freeArray(angles);
-		freePGM(image);
+		image = readPGM(argv[1]);
+		anglesF1T1 = createContour(image, t1);
+		fprintf(stdout, "%s:\n", argv[1]); printArray(anglesF1T1);
 
 		/* Check the arguments for the second file and threshold (optional). */
 		if(argc == 5) {
-			
 			int t2 = (int) strtol(argv[4], NULL, 10);
 			if(t2 < 1 || t2 > 255) {
 				fprintf(stderr, "Invalid Threshold! Threshold T2 = %d\n\n", t2);
 				exit(-1);
 			}
-			PGMImage image = readPGM(argv[3]);
-			Array angles = createContour(image, t2);
-			fprintf(stdout, "%s:\n", argv[3]); printArray(angles);
-
-			freeArray(angles);
-			freePGM(image);
+			freePGM(image); // clean the space used by the old picture
+			image = readPGM(argv[3]);
+			anglesF2T2 = createContour(image, t2);
+			fprintf(stdout, "%s:\n", argv[3]); printArray(anglesF2T2);
 
 			/* Correlation with Pearson Correlator. */
-			fprintf(stdout, "Can correlate now!\n");
+			double corr = correlation(anglesF1T1, anglesF2T2);
+			fprintf(stdout, "Correlation: %lf\n", corr);
 		}
+
+		freeArray(anglesF1T1);
+		freeArray(anglesF2T2);
+		freePGM(image);
 	}
 
 	return 0;

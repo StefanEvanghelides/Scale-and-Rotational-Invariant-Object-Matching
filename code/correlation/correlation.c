@@ -2,48 +2,45 @@
 #include <stdlib.h>
 #include <math.h>
 #include "../contour/array.h"
+#include "correlation.h"
 
-double mean(Array array) {
-    double sum = getArraySum(array);
-    return sum/len;
+double mean(Array x) {
+    double sum = getArraySum(x);
+    return sum/x.length;
 }
 
-void shift(Angle &x) {
-  double firstElement = x.data[0];
-  for(idx = 0; idx < x.length - 1; idx++) {
-    x.data[idx] = x.data[idx + 1];
+void shift(Array *x) {
+  double firstElement = x->data[0];
+  for(int idx = 0; idx < x->length - 1; idx++) {
+    x->data[idx] = x->data[idx + 1];
   }
-  x.data[x.length - 1] = firstElement;
+  x->data[x->length - 1] = firstElement;
 }
 
 double steadyStateCorrelator(Array x, Array y) {
     double sum = 0;
     for (int i = 0; i < x.length; i++) {
-      sum += x.data[j]*y.data[j];
+      sum += x.data[i]*y.data[i];
     }
-    sum;
+    return sum;
 }
 
-/* TODO: Update this function!. */
-void fastSteadyStatePearsonCorrelator(Array x, Array y) {
+double fastSteadyStatePearsonCorrelator(Array x, Array y) {
     /* Calculate the correlation of the current shift */
-    double r = steadyStateCorrelator(lenX, x, lenY, y, xy);
+    double r = steadyStateCorrelator(x, y);
+
     /* compute Pearson coefficients by correcting correlation */
     double sx = 0, sx2 = 0;
     double sy = 0, sy2 = 0;
-    for (int i=0; i < lenY; i++) {
-      sx += x[i]; sx2 += x[i]*x[i];
-      sy += y[i]; sy2 += y[i]*y[i];
+    for (int i = 0; i < y.length; i++) {
+      sx += x.data[i]; sx2 += x.data[i]*x.data[i];
+      sy += y.data[i]; sy2 += y.data[i]*y.data[i];
     }
-    double my = sy/lenY;
-    double vary = sqrt(sy2 - sy*sy/lenY); 
-    double varx = sqrt(sx2 - sx*sx/lenY);
-    for (int i=0; i < lenXY; i++) {
-      xy[i] = (xy[i] - my*sx)/(varx*vary);
-      sx = sx - x[i] + x[i+lenY];
-      sx2 = sx2 - x[i]*x[i] + x[i+lenY]*x[i+lenY];
-      varx = sqrt(sx2 - sx*sx/lenY);
-    }
+    double my = sy/y.length;
+    double vary = sqrt(sy2 - sy*sy/y.length); 
+    double varx = sqrt(sx2 - sx*sx/y.length);
+    
+    return (r - my*sx)/(varx*vary);
 }
 
 double correlation(Array x, Array y) {
@@ -53,7 +50,7 @@ double correlation(Array x, Array y) {
     exit(-1);
   }
 
-  for (shift = 0; shift < x.length; shift++) {
+  for (int shiftIdx = 0; shiftIdx < x.length; shiftIdx++) {
     shift(&x);
     pearsonCoeff = fastSteadyStatePearsonCorrelator(x, y);
     if(pearsonCoeff > pearsonMaxCoeff) {
