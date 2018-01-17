@@ -338,7 +338,6 @@ Array createContour(PGMImage image, int threshold) {
 		delta = angles.data[idx] - angles.data[idx-1];
 		addElement(&deltaAngles, delta);
 	}
-	addElement(&deltaAngles, angles.data[0]);
 	freeArray(angles);
 
 	/* 2. Smooth the Angles, normalize in the (-pi, pi) range. */
