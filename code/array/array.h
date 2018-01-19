@@ -15,6 +15,7 @@ void addElement(Array *array, double element);
 void printArray(Array array);
 void freeArray(Array array);
 double getArraySum(Array array);
+void stretchArray(Array *base, Array *x);
 
 #endif
  

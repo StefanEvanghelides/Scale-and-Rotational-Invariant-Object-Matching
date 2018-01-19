@@ -1,8 +1,8 @@
 CC=gcc 
 CFLAGS=-Wall -std=c99 -lm
 
-HEADERS = pgm/pgm.h contour/contour.h contour/array.h correlation/correlation.h
-OBJECTS = main.o pgm/pgm.o contour/contour.o contour/array.o correlation/correlation.o
+HEADERS = pgm/pgm.h contour/contour.h array/array.h correlation/correlation.h
+OBJECTS = main.o pgm/pgm.o contour/contour.o array/array.o correlation/correlation.o
 
 default: RUN
 

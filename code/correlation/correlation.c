@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "../contour/array.h"
+#include "../array/array.h"
 #include "correlation.h"
 
 double mean(Array x) {
@@ -43,14 +43,10 @@ double fastSteadyStatePearsonCorrelator(Array x, Array y) {
     return (r - my*sx)/(varx*vary);
 }
 
-/* Performs the circular correlation between 2 arrays with the same length. */
+/* Performs the circular correlation between 2 arrays with the same length. 
+ * PRE: x and y have the same length. */
 double correlation(Array x, Array y) {
   double pearsonCoeff, pearsonMaxCoeff = 0;
-
-  if(x.length != y.length) {
-    fprintf(stderr, "The 2 arrays do not have the same length!\n\n");
-    exit(-1);
-  }
 
   for (int shiftIdx = 0; shiftIdx < x.length; shiftIdx++) {
     shift(&x);

@@ -4,7 +4,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include "../pgm/pgm.h"
-#include "array.h"
+#include "../array/array.h"
 #include "contour.h"
 
 #define PI 3.14159265358979323846
@@ -296,7 +296,7 @@ Array createContour(PGMImage image, int threshold) {
 	/* No edge detected. Stop the program. */
 	if(!isInBounds(startX, startY, image.height, image.width)) { 
 		fprintf(stderr, "No edge detected. Cannot compute contour!\n\n");
-		exit(-1);
+		return angles;
 	}
 
 	/* Walk along the contour, storing the angles of each edge. */
@@ -330,6 +330,8 @@ Array createContour(PGMImage image, int threshold) {
 
 	} while(!reachedStartingPoint(row, col, startX, startY) && isInBounds(row, col, image.height, image.width)
 		&& (++count) < image.height * image. width);
+
+	fprintf(stdout, "Count = %d\n", count);
 
 	/* 1. Having the array of angles, compute the array of delta's. */
 	initArray(&deltaAngles, angles.length);
