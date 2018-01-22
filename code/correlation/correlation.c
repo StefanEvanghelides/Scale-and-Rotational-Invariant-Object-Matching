@@ -46,7 +46,7 @@ double fastSteadyStatePearsonCorrelator(Array x, Array y) {
 /* Performs the circular correlation between 2 arrays with the same length. 
  * PRE: x and y have the same length. */
 double correlation(Array x, Array y) {
-  double pearsonCoeff, pearsonMaxCoeff = 0;
+  double pearsonCoeff, pearsonMaxCoeff = -1.0;
 
   for (int shiftIdx = 0; shiftIdx < x.length; shiftIdx++) {
     shift(&x);

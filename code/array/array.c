@@ -26,6 +26,15 @@ void addElement(Array *array, double element) {
 	array->length++;
 }
 
+Array copyArray(Array x) {
+	Array copy; 
+	initArray(&copy, x.length);
+	for(int i=0; i < x.length; i++) {
+		addElement(&copy, x.data[i]);
+	}
+	return copy;
+}
+
 /* Print the array on the standard output. */
 void printArray(Array array) {
 	fprintf(stdout, "[");

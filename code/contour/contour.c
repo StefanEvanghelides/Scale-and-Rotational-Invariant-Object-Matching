@@ -169,7 +169,7 @@ bool reachedStartingPoint(int row, int col, int startX, int startY) {
 
 /* Checks whether the values of row and col are within the limits. */
 bool isInBounds(int row, int col, int height, int width) {
-	return (row>=0 && row<height && col>=0 && col<width);
+	return (row>=0 && row<height-1 && col>=0 && col<width-1);
 }
 
 /* Finds the location of the starting square, holding the coordinates of the top left corner. */
@@ -284,8 +284,8 @@ Array createContour(PGMImage image, int threshold) {
 	int row, col, count;
 	int topLeft, topRight, bottomLeft, bottomRight;
 	int startX, startY, firstPoint, secondPoint;
-	double currentAngle, delta;
-	Array angles, deltaAngles;
+	double currentAngle;
+	Array angles;
 
 	/* Initializes the array with the size 64. */
 	initArray(&angles, 64); 
@@ -334,19 +334,17 @@ Array createContour(PGMImage image, int threshold) {
 	fprintf(stdout, "Count = %d\n", count);
 
 	/* 1. Having the array of angles, compute the array of delta's. */
-	initArray(&deltaAngles, angles.length);
-	addElement(&deltaAngles, angles.data[0]);
-	for(int idx = 1; idx < angles.length; idx++) {
-		delta = angles.data[idx] - angles.data[idx-1];
-		addElement(&deltaAngles, delta);
+	int idx = angles.length-1;
+	while (idx > 1) {
+		angles.data[idx] -= angles.data[idx-1];
+		idx--;
 	}
-	freeArray(angles);
 
 	/* 2. Smooth the Angles, normalize in the (-pi, pi) range. */
-	for(int idx = 0; idx < deltaAngles.length; idx++) {
-		if(deltaAngles.data[idx] > PI) deltaAngles.data[idx] -= 2 * PI;
-		if(deltaAngles.data[idx] < -PI) deltaAngles.data[idx] += 2 * PI;
+	for(int idx = 0; idx < angles.length; idx++) {
+		if(angles.data[idx] > PI) angles.data[idx] -= 2 * PI;
+		if(angles.data[idx] < -PI) angles.data[idx] += 2 * PI;
 	}
 
-	return deltaAngles;
+	return angles;
 }

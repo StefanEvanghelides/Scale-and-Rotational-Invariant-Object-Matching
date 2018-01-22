@@ -33,7 +33,7 @@ Array flattenImage(char *filename, char *thresholdString) {
 
 	PGMImage image = readPGM(filename);
 	Array contour = createContour(image, threshold);
-	fprintf(stdout, "%s:\n", filename);  
+	fprintf(stdout, "Initial %s:\n", filename); 
 	printArray(contour);
 	
 	freePGM(image);
@@ -41,23 +41,29 @@ Array flattenImage(char *filename, char *thresholdString) {
 	return contour;
 }
 
-double correlateArrays(Array anglesF1T1, Array anglesF2T2, char *F1, char *T1, char *F2, char *T2) {
-	double corr = 0.0;
+double correlateArrays(Array anglesF1T1, Array anglesF2T2) {
+	double corr = -1.0; 
 
-	anglesF2T2 = flattenImage(F2, T2);
-	
+	Array copy1 = copyArray(anglesF1T1);
+	Array copy2 = copyArray(anglesF2T2);
+
 	/* Ensure arrays have the same length. */
-	if(anglesF1T1.length > anglesF2T2.length) stretchArray(&anglesF1T1, &anglesF2T2);
-	else if(anglesF1T1.length < anglesF2T2.length) stretchArray(&anglesF2T2, &anglesF1T1);
+	if(copy1.length > copy2.length && copy2.length != 0) stretchArray(&copy1, &copy2);
+	else if(copy1.length < copy2.length && copy1.length != 0) stretchArray(&copy2, &copy1);
 
 	/* Correlation with Pearson Correlator. */
-	if(anglesF1T1.length == anglesF2T2.length) {
-		fprintf(stdout, "Arrays have the same length = %d\n", anglesF1T1.length);
-		corr = correlation(anglesF1T1, anglesF2T2);
-		fprintf(stdout, "Correlation: %lf\n\n", corr);
+	if(copy1.length == copy2.length) {
+		fprintf(stdout, "Arrays have the same length = %d\n", copy1.length);
+
+		printf("First:\n"); printArray(copy1);
+		printf("Second:\n"); printArray(copy2);
+
+		corr = correlation(copy1, copy2);
+		fprintf(stdout, "\nCorrelation: %lf\n\n", corr);
 	} else fprintf(stderr, "The 2 arrays do not have the same length!\n\n");
 
-	freeArray(anglesF2T2);
+	freeArray(copy1);
+	freeArray(copy2);
 
 	return corr;
 }
@@ -67,7 +73,7 @@ void execute(int argc, char** argv) {
 	Array anglesF1T1, anglesF2T2;
 
 	/* Check arguments. If they fail, exit the program with -1 code.*/
-	if(argc < 3 &&  argc > 5) {
+	if(argc < 3 ||  argc > 5) {
 		fprintf(stderr, "ERROR: Could not run the program!\n\n"
 			            "Usage: ./RUN <file_name F1> <Threshold T1 for F1> "
 			            "[<file_name F2> <Threshold T2 for F2>]\n\n"
@@ -82,22 +88,24 @@ void execute(int argc, char** argv) {
 
 		/* Check the arguments for the second file and threshold (optional). */
 		if(argc == 5) {
-			correlateArrays(anglesF1T1, anglesF2T2, argv[1], argv[2], argv[3], argv[4]);
+			anglesF2T2 = flattenImage(argv[3], argv[4]);
+			correlateArrays(anglesF1T1, anglesF2T2);
 		} else {
 			/* there are only 4 arguments, meaning that the last image does not have a threshold by defaul.
 			 * It will test for all of them, printing the best match. */
 			//fprintf(stderr, "No implementation yet!\n\n");
-			double maxCorr = 0.0;
-			double threshold = 0.0;
-			double currentCorr = 0.0;
+			int threshold = 0;
+			double currentCorr = 0.0, maxCorr = 0.0;
 			for(int i=1; i < 254; i++) {
-				currentCorr = correlateArrays(anglesF1T1, anglesF2T2, argv[1], argv[2], argv[3], intToStr(i));
+				anglesF2T2 = flattenImage(argv[3], intToStr(i));
+				currentCorr = correlateArrays(anglesF1T1, anglesF2T2);
 				if(currentCorr > maxCorr) {
 					maxCorr = currentCorr;
 					threshold = i;
 				}
+				freeArray(anglesF2T2);
 			}
-			fprintf(stdout, "Best Correlation = %lf with threshold = %lf", maxCorr, threshold);
+			fprintf(stdout, "Best Correlation = %lf with threshold = %d\n\n", maxCorr, threshold);
 		}
 
 		freeArray(anglesF1T1);

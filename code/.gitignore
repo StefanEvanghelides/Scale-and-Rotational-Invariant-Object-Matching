@@ -42,7 +42,7 @@
 RUN
 CONVERT
 ROTATE
-tests/
+results/
 
 # PGM files
 *.pgm
