@@ -12,9 +12,11 @@ typedef struct {
 void initArray(Array *array, int size);
 void doubleSize(Array *array);
 void addElement(Array *array, double element);
+Array copyArray(Array x);
 void printArray(Array array);
 void freeArray(Array array);
 double getArraySum(Array array);
+void stretchArray(Array *base, Array *x);
 
 #endif
  

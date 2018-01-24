@@ -4,7 +4,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include "../pgm/pgm.h"
-#include "array.h"
+#include "../array/array.h"
 #include "contour.h"
 
 #define PI 3.14159265358979323846
@@ -169,7 +169,7 @@ bool reachedStartingPoint(int row, int col, int startX, int startY) {
 
 /* Checks whether the values of row and col are within the limits. */
 bool isInBounds(int row, int col, int height, int width) {
-	return (row>=0 && row<height && col>=0 && col<width);
+	return (row>=0 && row<height-1 && col>=0 && col<width-1);
 }
 
 /* Finds the location of the starting square, holding the coordinates of the top left corner. */
@@ -209,7 +209,7 @@ double getAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int 
 	switch(firstPoint) {
 		case UP:
 			normFirst = fabs(topRight - threshold) / fabs(topRight - topLeft);
-			if (secondPoint == DOWN) {
+			if (secondPoint == DOWN) { /** REQUIRES HOTFIX **/
 				normSecond = fabs(bottomRight - threshold) / fabs(bottomRight - bottomLeft);
 				delta = normFirst - normSecond;
 				angle = atan2(-1, delta);
@@ -225,7 +225,7 @@ double getAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int 
 
 		case DOWN:
 			normFirst = fabs(bottomRight - threshold) / fabs(bottomRight - bottomLeft);
-			if (secondPoint == UP) {
+			if (secondPoint == UP) {/** REQUIRES HOTFIX **/
 				normSecond = fabs(topRight - threshold) / fabs(topRight - topLeft);
 				delta = normFirst - normSecond;
 				angle = atan2(1, delta);
@@ -241,7 +241,7 @@ double getAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int 
 
 		case LEFT:
 			normFirst = fabs(topLeft - threshold) / fabs(bottomLeft - topLeft);
-			if (secondPoint == RIGHT) {
+			if (secondPoint == RIGHT) {/** REQUIRES HOTFIX **/
 				normSecond = fabs(topRight - threshold) / fabs(topRight - bottomRight);
 				delta = normFirst - normSecond;
 				angle = atan2(delta, 1);
@@ -257,7 +257,7 @@ double getAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int 
 
 		case RIGHT:
 			normFirst = fabs(topRight - threshold) / fabs(bottomRight - topRight);
-			if (secondPoint == LEFT) {
+			if (secondPoint == LEFT) {/** REQUIRES HOTFIX **/
 				normSecond = fabs(topLeft - threshold) / fabs(topLeft - bottomLeft);
 				delta = normFirst - normSecond;
 				angle = atan2(delta, -1);
@@ -284,8 +284,8 @@ Array createContour(PGMImage image, int threshold) {
 	int row, col, count;
 	int topLeft, topRight, bottomLeft, bottomRight;
 	int startX, startY, firstPoint, secondPoint;
-	double currentAngle, delta, circle;
-	Array angles, deltaAngles;
+	double currentAngle;
+	Array angles;
 
 	/* Initializes the array with the size 64. */
 	initArray(&angles, 64); 
@@ -296,7 +296,7 @@ Array createContour(PGMImage image, int threshold) {
 	/* No edge detected. Stop the program. */
 	if(!isInBounds(startX, startY, image.height, image.width)) { 
 		fprintf(stderr, "No edge detected. Cannot compute contour!\n\n");
-		exit(-1);
+		return angles;
 	}
 
 	/* Walk along the contour, storing the angles of each edge. */
@@ -311,7 +311,6 @@ Array createContour(PGMImage image, int threshold) {
 		   Otherwise, the first point will become the flipped version of the (previous) second point.*/
 		if(firstPoint == NONE) {
 			firstPoint = getFirstPoint(topLeft, topRight, bottomLeft, bottomRight, threshold);
-			fprintf(stdout, "Starting FirstPoint = %d\n\n", firstPoint);
 		} else firstPoint = secondPoint * (-1); 
 
 		secondPoint = getSecondPoint(topLeft, topRight, bottomLeft, bottomRight, threshold, firstPoint);
@@ -320,37 +319,32 @@ Array createContour(PGMImage image, int threshold) {
 
 		addElement(&angles, currentAngle);
 
+		#if 0 /* Verbose direction of the contour, used only for debugging. */
 		printPointDirection(firstPoint);
 		fprintf(stdout, " -> ");
 		printPointDirection(secondPoint);
 		fprintf(stdout, "\nEdge no. %d on position (%d,%d); Angle=%lf\n\n", count, row, col, currentAngle);
-	
+		#endif
+
 		findNextSquare(secondPoint, &row, &col);
 
 	} while(!reachedStartingPoint(row, col, startX, startY) && isInBounds(row, col, image.height, image.width)
 		&& (++count) < image.height * image. width);
 
+	fprintf(stdout, "Count = %d\n", count);
+
 	/* 1. Having the array of angles, compute the array of delta's. */
-	initArray(&deltaAngles, angles.length);
-	addElement(&deltaAngles, angles.data[0]);
-	for(int idx = 1; idx < angles.length; idx++) {
-		delta = angles.data[idx] - angles.data[idx-1];
-		addElement(&deltaAngles, delta);
+	int idx = angles.length-1;
+	while (idx > 1) {
+		angles.data[idx] -= angles.data[idx-1];
+		idx--;
 	}
-	freeArray(angles);
 
 	/* 2. Smooth the Angles, normalize in the (-pi, pi) range. */
-	for(int idx = 0; idx < deltaAngles.length; idx++) {
-		if(deltaAngles.data[idx] > PI) deltaAngles.data[idx] -= 2 * PI;
-		if(deltaAngles.data[idx] < -PI) deltaAngles.data[idx] += 2 * PI;
+	for(int idx = 0; idx < angles.length; idx++) {
+		if(angles.data[idx] > PI) angles.data[idx] -= 2 * PI;
+		if(angles.data[idx] < -PI) angles.data[idx] += 2 * PI;
 	}
 
-	/* 3. We need to "add a circle" to the given function. */ 
-	circle = getArraySum(deltaAngles)/deltaAngles.length;
-	fprintf(stdout, "Circle = %.8f\n", circle);
-	for(int idx = 0; idx < deltaAngles.length; idx++) {
-		deltaAngles.data[idx] -= circle;
-	}
-
-	return deltaAngles;
+	return angles;
 }

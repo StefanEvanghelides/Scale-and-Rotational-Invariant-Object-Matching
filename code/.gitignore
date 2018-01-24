@@ -42,10 +42,7 @@
 RUN
 CONVERT
 ROTATE
-tests/
 
-# PGM files
-*.pgm
 
 # Debug files
 *.dSYM/
