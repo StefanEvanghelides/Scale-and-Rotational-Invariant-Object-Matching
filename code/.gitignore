@@ -43,8 +43,6 @@ RUN
 CONVERT
 ROTATE
 
-# PGM files
-*.pgm
 
 # Debug files
 *.dSYM/

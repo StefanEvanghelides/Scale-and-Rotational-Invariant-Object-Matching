@@ -90,10 +90,8 @@ void execute(int argc, char** argv) {
 		if(argc == 5) {
 			anglesF2T2 = flattenImage(argv[3], argv[4]);
 			correlateArrays(anglesF1T1, anglesF2T2);
-		} else {
-			/* there are only 4 arguments, meaning that the last image does not have a threshold by defaul.
-			 * It will test for all of them, printing the best match. */
-			//fprintf(stderr, "No implementation yet!\n\n");
+		} else if(argc == 4){
+			/* It will test for all of them, printing the best match. */
 			int threshold = 0;
 			double currentCorr = 0.0, maxCorr = 0.0;
 			for(int i=1; i < 254; i++) {
