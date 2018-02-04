@@ -47,6 +47,7 @@ correlation = 0.656871
 y1.append(y1[0])
 y2.append(y2[0])
 
+# Range of the arrays
 x1 = range(len(y1))
 x2 = range(len(y2))
 
