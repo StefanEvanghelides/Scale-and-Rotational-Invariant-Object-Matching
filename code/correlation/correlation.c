@@ -9,6 +9,7 @@ double mean(Array x) {
     return sum/x.length;
 }
 
+/* Permutates the array by 1 value to the left. */
 void shift(Array *x) {
   double firstElement = x->data[0];
   for(int idx = 0; idx < x->length - 1; idx++) {
@@ -17,6 +18,7 @@ void shift(Array *x) {
   x->data[x->length - 1] = firstElement;
 }
 
+/* Computes the steady state of the Pearson Correlator Coefficient. */
 double steadyStateCorrelator(Array x, Array y) {
     double sum = 0;
     for (int i = 0; i < x.length; i++) {
@@ -25,6 +27,7 @@ double steadyStateCorrelator(Array x, Array y) {
     return sum;
 }
 
+/* Computes the Pearson Correlator Coefficient. */
 double fastSteadyStatePearsonCorrelator(Array x, Array y) {
     /* Calculate the correlation of the current shift */
     double r = steadyStateCorrelator(x, y);
