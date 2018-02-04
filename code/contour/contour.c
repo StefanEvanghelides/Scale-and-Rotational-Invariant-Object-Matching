@@ -209,7 +209,7 @@ double getAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int 
 	switch(firstPoint) {
 		case UP:
 			normFirst = fabs(topRight - threshold) / fabs(topRight - topLeft);
-			if (secondPoint == DOWN) { /** REQUIRES HOTFIX **/
+			if (secondPoint == DOWN) {
 				normSecond = fabs(bottomRight - threshold) / fabs(bottomRight - bottomLeft);
 				delta = normFirst - normSecond;
 				angle = atan2(-1, delta);
@@ -225,7 +225,7 @@ double getAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int 
 
 		case DOWN:
 			normFirst = fabs(bottomRight - threshold) / fabs(bottomRight - bottomLeft);
-			if (secondPoint == UP) {/** REQUIRES HOTFIX **/
+			if (secondPoint == UP) {
 				normSecond = fabs(topRight - threshold) / fabs(topRight - topLeft);
 				delta = normFirst - normSecond;
 				angle = atan2(1, delta);
@@ -241,7 +241,7 @@ double getAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int 
 
 		case LEFT:
 			normFirst = fabs(topLeft - threshold) / fabs(bottomLeft - topLeft);
-			if (secondPoint == RIGHT) {/** REQUIRES HOTFIX **/
+			if (secondPoint == RIGHT) {
 				normSecond = fabs(topRight - threshold) / fabs(topRight - bottomRight);
 				delta = normFirst - normSecond;
 				angle = atan2(delta, 1);
@@ -257,7 +257,7 @@ double getAngle(int topLeft, int topRight, int bottomLeft, int bottomRight, int 
 
 		case RIGHT:
 			normFirst = fabs(topRight - threshold) / fabs(bottomRight - topRight);
-			if (secondPoint == LEFT) {/** REQUIRES HOTFIX **/
+			if (secondPoint == LEFT) {
 				normSecond = fabs(topLeft - threshold) / fabs(topLeft - bottomLeft);
 				delta = normFirst - normSecond;
 				angle = atan2(delta, -1);
@@ -331,16 +331,16 @@ Array createContour(PGMImage image, int threshold) {
 	} while(!reachedStartingPoint(row, col, startX, startY) && isInBounds(row, col, image.height, image.width)
 		&& (++count) < image.height * image. width);
 
-	fprintf(stdout, "Count = %d\n", count);
+	fprintf(stdout, "Length = %d\n", count);
 
-	/* 1. Having the array of angles, compute the array of delta's. */
+	/* Having the array of angles, compute the array of delta's. */
 	int idx = angles.length-1;
 	while (idx > 1) {
 		angles.data[idx] -= angles.data[idx-1];
 		idx--;
 	}
 
-	/* 2. Smooth the Angles, normalize in the (-pi, pi) range. */
+	/* Smooth the Angles, normalize in the (-pi, pi) range. */
 	for(int idx = 0; idx < angles.length; idx++) {
 		if(angles.data[idx] > PI) angles.data[idx] -= 2 * PI;
 		if(angles.data[idx] < -PI) angles.data[idx] += 2 * PI;

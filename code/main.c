@@ -33,7 +33,7 @@ Array flattenImage(char *filename, char *thresholdString) {
 
 	PGMImage image = readPGM(filename);
 	Array contour = createContour(image, threshold);
-	fprintf(stdout, "Initial %s:\n", filename); 
+	fprintf(stdout, "%s:\n", filename); 
 	printArray(contour);
 	
 	freePGM(image);

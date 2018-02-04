@@ -26,6 +26,7 @@ void addElement(Array *array, double element) {
 	array->length++;
 }
 
+/* Creates a copy of the array. */
 Array copyArray(Array x) {
 	Array copy; 
 	initArray(&copy, x.length);
@@ -64,14 +65,10 @@ void stretchArray(Array *base, Array *x) {
 	for(int idx=0; idx < x->length; idx++) {
 		while(currentStep >= 1) {
 			// Add the interpolated value
-			// 1. a)
 			if(idx > 0) addElement(&stretched, (x->data[idx-1] + x->data[idx]) / 2);
 			else addElement(&stretched, (x->data[idx] + x->data[x->length - 1]) / 2);	
-			// 1. b)
 
-
-			// Set currentStep with 1 value lower
-			currentStep -= 1;
+			currentStep -= 1; // Set currentStep with 1 value lower
 		}
 		addElement(&stretched, x->data[idx]);
 		currentStep += baseStep;
