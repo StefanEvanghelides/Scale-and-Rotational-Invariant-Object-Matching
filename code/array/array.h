@@ -9,14 +9,14 @@ typedef struct {
 } Array;
 
 /* Prototypes. */
-void initArray(Array *array, int size);
+void initArray(Array *array);
 void doubleSize(Array *array);
 void addElement(Array *array, double element);
 Array copyArray(Array x);
+void popElement(Array *x);
 void printArray(Array array);
-void freeArray(Array array);
 double getArraySum(Array array);
-void stretchArray(Array *base, Array *x);
+void freeArray(Array array);
 
 #endif
  

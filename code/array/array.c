@@ -4,10 +4,10 @@
 #include "array.h"
 
 /* Initialized an array with maxSize = size. */
-void initArray(Array *array, int size) {
+void initArray(Array *array) {
 	array->length = 0;
-	array->maxSize = size;
-	array->data = calloc(size, sizeof(double));
+	array->maxSize = 1;
+	array->data = calloc(1, sizeof(double));
 }
 
 /* Doubles the maximum size of the array. */
@@ -29,11 +29,16 @@ void addElement(Array *array, double element) {
 /* Creates a copy of the array. */
 Array copyArray(Array x) {
 	Array copy; 
-	initArray(&copy, x.length);
+	initArray(&copy);
 	for(int i=0; i < x.length; i++) {
 		addElement(&copy, x.data[i]);
 	}
 	return copy;
+}
+
+void popElement(Array *x) {
+	x->length--;
+	x->data[x->length] = 0;
 }
 
 /* Print the array on the standard output. */
@@ -50,37 +55,6 @@ double getArraySum(Array array) {
 	double sum = 0;
 	for(int i = 0; i < array.length; i++) sum += array.data[i];
 	return sum;
-}
-
-/* Stretch array x to have the same size as the base array. */
-void stretchArray(Array *base, Array *x) {
-	// Initialize new array
-	Array stretched; initArray(&stretched, base->length);
-
-	// Add new values:
-	// for Double step = len(base) / len(x), make sure that every time step reaches 1,
-	//      add an interpolated value into the array
-	double baseStep = (double) base->length / x->length - 1;
-	double currentStep = baseStep;
-	for(int idx=0; idx < x->length; idx++) {
-		while(currentStep >= 1) {
-			// Add the interpolated value
-			if(idx > 0) addElement(&stretched, (x->data[idx-1] + x->data[idx]) / 2);
-			else addElement(&stretched, (x->data[idx] + x->data[x->length - 1]) / 2);	
-
-			currentStep -= 1; // Set currentStep with 1 value lower
-		}
-		addElement(&stretched, x->data[idx]);
-		currentStep += baseStep;
-	}
-
-	// Make x = stretched
-	for(int i = x->length; i<base->length; i++) {
-		addElement(x, 0); //add dummy values to match the length
-	}
-	for(int i=0; i < x->length; i++) {
-		x->data[i] = stretched.data[i];
-	}
 }
 
 /* Free Array's memory. */

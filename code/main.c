@@ -6,6 +6,7 @@
 #include "array/array.h"
 #include "contour/contour.h"
 #include "correlation/correlation.h"
+#include "interpolation/interpolation.h"
 
 char* intToStr(int x) {
 	char *str = malloc(4); // expect 3 digits and the terminating char;
@@ -48,8 +49,8 @@ double correlateArrays(Array anglesF1T1, Array anglesF2T2) {
 	Array copy2 = copyArray(anglesF2T2);
 
 	/* Ensure arrays have the same length. */
-	if(copy1.length > copy2.length && copy2.length != 0) stretchArray(&copy1, &copy2);
-	else if(copy1.length < copy2.length && copy1.length != 0) stretchArray(&copy2, &copy1);
+	if(copy1.length > copy2.length && copy2.length != 0) interpolate(&copy1, &copy2);
+	else if(copy1.length < copy2.length && copy1.length != 0) interpolate(&copy2, &copy1);
 
 	/* Correlation with Pearson Correlator. */
 	if(copy1.length == copy2.length) {
@@ -111,7 +112,17 @@ void execute(int argc, char** argv) {
 }
 
 int main(int argc, char** argv) {
-	execute(argc, argv);
+	//execute(argc, argv);
+
+	Array base, a;
+	initArray(&a);
+	addElement(&a, 6);
+	addElement(&a, 7);
+	addElement(&a, 8);
+	addElement(&a, 9);
+	addElement(&a, 10);
+
+	interpolate(&base, &a);
 
 	return 0;
 }

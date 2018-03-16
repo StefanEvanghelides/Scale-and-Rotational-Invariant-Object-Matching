@@ -288,7 +288,7 @@ Array createContour(PGMImage image, int threshold) {
 	Array angles;
 
 	/* Initializes the array with the size 64. */
-	initArray(&angles, 64); 
+	initArray(&angles); 
 	
 	/* Find starting square. */
 	findStartingSquareLocation(image, threshold, &startX, &startY);
