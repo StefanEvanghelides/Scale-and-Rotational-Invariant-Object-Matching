@@ -91,6 +91,7 @@ void execute(int argc, char** argv) {
 		if(argc == 5) {
 			anglesF2T2 = flattenImage(argv[3], argv[4]);
 			correlateArrays(anglesF1T1, anglesF2T2);
+			freeArray(anglesF2T2);
 		} else if(argc == 4){
 			/* It will test for all of them, printing the best match. */
 			int threshold = 0;
@@ -112,17 +113,7 @@ void execute(int argc, char** argv) {
 }
 
 int main(int argc, char** argv) {
-	//execute(argc, argv);
-
-	Array base, a;
-	initArray(&a);
-	addElement(&a, 6);
-	addElement(&a, 7);
-	addElement(&a, 8);
-	addElement(&a, 9);
-	addElement(&a, 10);
-
-	interpolate(&base, &a);
+	execute(argc, argv);
 
 	return 0;
 }

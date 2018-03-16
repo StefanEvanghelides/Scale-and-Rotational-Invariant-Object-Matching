@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "../array/array.h"
 #include "interpolation.h"
 
@@ -35,6 +36,21 @@ void nonUniformInterpolation(Array *base, Array *x) {
 	}
 }
 
+double getSplineElement(double step, Array a, Array b, Array c, Array d) {
+	double element = 0.0;
+	int splineIdx = (int) step;
+	double A = a.data[splineIdx];
+	double B = b.data[splineIdx];
+	double C = c.data[splineIdx];
+	double D = d.data[splineIdx];
+
+	// NOTE: check the parentheses! step - splineIdx (-1??)
+	element = A + B*(step - splineIdx) + C*pow(step - splineIdx, 2) + D*pow(step - splineIdx, 3);
+
+	return element;
+}
+
+/* Compute the components of the cubic spline. */
 void computeCubicSplines(Array *a, Array *b, Array *c, Array *d) {
 
     /** Step 0 */
@@ -50,10 +66,11 @@ void computeCubicSplines(Array *a, Array *b, Array *c, Array *d) {
     z = calloc(n+1, sizeof(double));
 
     /** Step 1 */
-    for (i = 0; i < n; ++i) h[i] = 1;
+    // NOTE: Here was h[i] = x[i+1] - x[i];
+    for (i = 0; i < n; i++) h[i] = 1;
 
     /** Step 2 */
-    for (i = 1; i < n; ++i)
+    for (i = 1; i < n; i++)
         A[i] = 3 * (a->data[i + 1] - a->data[i]) / h[i] - 3 * (a->data[i] - a->data[i - 1]) / h[i - 1];
 
     /** Step 3 */
@@ -62,7 +79,9 @@ void computeCubicSplines(Array *a, Array *b, Array *c, Array *d) {
     z[0] = 0;
 
     /** Step 4 */
-    for (i = 1; i < n; ++i) {
+    for (i = 1; i < n; i++) {
+    	// NOTE: the first element of l was
+    	// 2 (x[i+1] - x[i-1])
         l[i] = 4 - h[i - 1] * u[i - 1];
         u[i] = h[i] / l[i];
         z[i] = (A[i] - h[i - 1] * z[i - 1]) / l[i];
@@ -74,16 +93,11 @@ void computeCubicSplines(Array *a, Array *b, Array *c, Array *d) {
     c->data[n] = 0;
 
     /** Step 6 */
-    for (j = n - 1; j >= 0; --j) {
+    for (j = n - 1; j >= 0; j--) {
         c->data[j] = z[j] - u[j] * c->data[j + 1];
         b->data[j] = (a->data[j + 1] - a->data[j]) / h[j] - h[j] * (c->data[j + 1] + 2 * c->data[j]) / 3;
         d->data[j] = (c->data[j + 1] - c->data[j]) / (3 * h[j]);
     }
-
-    /** Step 7 */
-    printf("%2s %8s %8s %8s %8s\n", "i", "ai", "bi", "ci", "di");
-    for (i = 0; i < n; ++i)
-        printf("%2d %8.2f %8.2f %8.2f %8.2f\n", i, a->data[i], b->data[i], c->data[i], d->data[i]);
 
     free(A);
     free(h);
@@ -102,6 +116,24 @@ void interpolate(Array *base, Array *x) {
 	Array c = copyArray(*x);
 	Array d = copyArray(*x); popElement(&d);
 	computeCubicSplines(x, &b, &c, &d);
+
+	double baseStep = (double) x->length / base->length;
+	double currentStep = baseStep;
+
+	Array newX; initArray(&newX);
+	for(int i=0; i < base->length; i++) {
+		double element = getSplineElement(currentStep, *x, b, c, d);
+		addElement(&newX, element);
+		currentStep += baseStep;
+	}
+
+	freeArray(*x);
+	*x = copyArray(newX);
+
+	freeArray(newX);
+	freeArray(b);
+	freeArray(c);
+	freeArray(d);
 
 	// Scale up/down?
 }
