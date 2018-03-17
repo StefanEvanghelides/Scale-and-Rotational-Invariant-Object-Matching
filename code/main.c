@@ -9,7 +9,7 @@
 #include "interpolation/interpolation.h"
 
 char* intToStr(int x) {
-	char *str = malloc(4); // expect 3 digits and the terminating char;
+	char *str = calloc(4, sizeof(char)); // expect 3 digits and the terminating char;
 	int digit, idx = 0;
 	while(x != 0) {
 		digit = x % 10;
@@ -91,12 +91,12 @@ void execute(int argc, char** argv) {
 		if(argc == 5) {
 			anglesF2T2 = flattenImage(argv[3], argv[4]);
 			correlateArrays(anglesF1T1, anglesF2T2);
-			freeArray(anglesF2T2);
+			//freeArray(anglesF2T2);
 		} else if(argc == 4){
 			/* It will test for all of them, printing the best match. */
 			int threshold = 0;
 			double currentCorr = 0.0, maxCorr = 0.0;
-			for(int i=1; i < 254; i++) {
+			for(int i=90; i < 200; i++) {
 				anglesF2T2 = flattenImage(argv[3], intToStr(i));
 				currentCorr = correlateArrays(anglesF1T1, anglesF2T2);
 				if(currentCorr > maxCorr) {

@@ -36,20 +36,6 @@ void nonUniformInterpolation(Array *base, Array *x) {
 	}
 }
 
-double getSplineElement(double step, Array a, Array b, Array c, Array d) {
-	double element = 0.0;
-	int splineIdx = (int) step;
-	double A = a.data[splineIdx];
-	double B = b.data[splineIdx];
-	double C = c.data[splineIdx];
-	double D = d.data[splineIdx];
-
-	// NOTE: check the parentheses! step - splineIdx (-1??)
-	element = A + B*(step - splineIdx) + C*pow(step - splineIdx, 2) + D*pow(step - splineIdx, 3);
-
-	return element;
-}
-
 /* Compute the components of the cubic spline. */
 void computeCubicSplines(Array *a, Array *b, Array *c, Array *d) {
 
@@ -106,12 +92,27 @@ void computeCubicSplines(Array *a, Array *b, Array *c, Array *d) {
     free(z);
 }
 
+double getSplineElement(double step, Array a, Array b, Array c, Array d) {
+	double element = 0.0;
+	int splineIdx = (int) step;
+	double A = a.data[splineIdx];
+	double B = b.data[splineIdx];
+	double C = c.data[splineIdx];
+	double D = d.data[splineIdx];
+
+	// NOTE: check the parentheses! step - splineIdx (-1??)
+	element = A + B*(step - splineIdx) + C*pow(step - splineIdx, 2) + D*pow(step - splineIdx, 3);
+
+	return element;
+}
 
 void interpolate(Array *base, Array *x) {
 	// Mode 1: nonUniformInterpolation
 	//nonUniformInterpolation(base, x);
 
-	// Mode 2: Spline/lanczos
+
+	// Mode 2: Spline - scaling up
+
 	Array b = copyArray(*x); popElement(&b);
 	Array c = copyArray(*x);
 	Array d = copyArray(*x); popElement(&d);
@@ -120,7 +121,9 @@ void interpolate(Array *base, Array *x) {
 	double baseStep = (double) x->length / base->length;
 	double currentStep = baseStep;
 
-	Array newX; initArray(&newX);
+	Array newX; 
+	initArray(&newX);
+	
 	for(int i=0; i < base->length; i++) {
 		double element = getSplineElement(currentStep, *x, b, c, d);
 		addElement(&newX, element);
@@ -135,5 +138,30 @@ void interpolate(Array *base, Array *x) {
 	freeArray(c);
 	freeArray(d);
 
-	// Scale up/down?
+
+	// Mode 3: Spine- scaling down
+	// Array b = copyArray(*base); popElement(&b);
+	// Array c = copyArray(*base);
+	// Array d = copyArray(*base); popElement(&d);
+	// computeCubicSplines(base, &b, &c, &d);
+
+	// double baseStep = (double) base->length / x->length;
+	// double currentStep = baseStep;
+
+	// Array newBase; 
+	// initArray(&newBase);
+
+	// for(int i=0; i < x->length; i++) {
+	// 	double element = getSplineElement(currentStep, *base, b, c, d);
+	// 	addElement(&newBase, element);
+	// 	currentStep += baseStep;
+	// }
+
+	// freeArray(*base);
+	// *base = copyArray(newBase);
+
+	// freeArray(newBase);
+	// freeArray(b);
+	// freeArray(c);
+	// freeArray(d);
 }
