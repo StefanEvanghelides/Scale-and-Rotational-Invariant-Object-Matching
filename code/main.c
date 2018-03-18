@@ -96,7 +96,7 @@ void execute(int argc, char** argv) {
 			/* It will test for all of them, printing the best match. */
 			int threshold = 0;
 			double currentCorr = 0.0, maxCorr = 0.0;
-			for(int i=90; i < 200; i++) {
+			for(int i=100; i < 170; i++) {
 				anglesF2T2 = flattenImage(argv[3], intToStr(i));
 				currentCorr = correlateArrays(anglesF1T1, anglesF2T2);
 				if(currentCorr > maxCorr) {
@@ -114,6 +114,18 @@ void execute(int argc, char** argv) {
 
 int main(int argc, char** argv) {
 	execute(argc, argv);
+
+
+	// Array base, x;
+	// initArray(&x);
+	// addElement(&x, 0);
+	// addElement(&x, 3);
+	// addElement(&x, 2);
+	// addElement(&x, 4);
+	// addElement(&x, 3);
+	// addElement(&x, 2);
+
+	// interpolate(&base, &x);
 
 	return 0;
 }

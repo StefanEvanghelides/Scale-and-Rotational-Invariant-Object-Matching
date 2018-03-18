@@ -3,7 +3,7 @@
 
 /* Prototypes. */
 void interpolate(Array *base, Array *x);
-void spline(Array *base, Array *a);
+void linearSpline(Array *base, Array *x);
 
 #endif
  

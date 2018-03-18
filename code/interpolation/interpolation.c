@@ -92,27 +92,23 @@ void computeCubicSplines(Array *a, Array *b, Array *c, Array *d) {
     free(z);
 }
 
-double getSplineElement(double step, Array a, Array b, Array c, Array d) {
+/* Get the interpolated value from the splines. */
+double getSplineElement(double x, Array a, Array b, Array c, Array d) {
 	double element = 0.0;
-	int splineIdx = (int) step;
+	int splineIdx = (int) x;
 	double A = a.data[splineIdx];
 	double B = b.data[splineIdx];
 	double C = c.data[splineIdx];
 	double D = d.data[splineIdx];
 
 	// NOTE: check the parentheses! step - splineIdx (-1??)
-	element = A + B*(step - splineIdx) + C*pow(step - splineIdx, 2) + D*pow(step - splineIdx, 3);
+	element = A + B*(x - splineIdx) + C*pow(x - splineIdx, 2) + D*pow(x - splineIdx, 3);
 
 	return element;
 }
 
-void interpolate(Array *base, Array *x) {
-	// Mode 1: nonUniformInterpolation
-	//nonUniformInterpolation(base, x);
 
-
-	// Mode 2: Spline - scaling up
-
+void cubicSplineScaleUp(Array *base, Array *x) {
 	Array b = copyArray(*x); popElement(&b);
 	Array c = copyArray(*x);
 	Array d = copyArray(*x); popElement(&d);
@@ -124,7 +120,8 @@ void interpolate(Array *base, Array *x) {
 	Array newX; 
 	initArray(&newX);
 	
-	for(int i=0; i < base->length; i++) {
+	addElement(&newX, base->data[0]); // start with the first element
+	for(int i=1; i < base->length; i++) {
 		double element = getSplineElement(currentStep, *x, b, c, d);
 		addElement(&newX, element);
 		currentStep += baseStep;
@@ -137,31 +134,93 @@ void interpolate(Array *base, Array *x) {
 	freeArray(b);
 	freeArray(c);
 	freeArray(d);
+}
+
+void cubicSplineScaleDown(Array *base, Array *x) {
+	Array b = copyArray(*base); popElement(&b);
+	Array c = copyArray(*base);
+	Array d = copyArray(*base); popElement(&d);
+	computeCubicSplines(base, &b, &c, &d);
+
+	double baseStep = (double) base->length / x->length;
+	double currentStep = baseStep;
+
+	Array newBase; 
+	initArray(&newBase);
+
+	for(int i=0; i < x->length; i++) {
+		double element = getSplineElement(currentStep, *base, b, c, d);
+		addElement(&newBase, element);
+		currentStep += baseStep;
+	}
+
+	freeArray(*base);
+	*base = copyArray(newBase);
+
+	freeArray(newBase);
+	freeArray(b);
+	freeArray(c);
+	freeArray(d);
+}
 
 
-	// Mode 3: Spine- scaling down
-	// Array b = copyArray(*base); popElement(&b);
-	// Array c = copyArray(*base);
-	// Array d = copyArray(*base); popElement(&d);
-	// computeCubicSplines(base, &b, &c, &d);
+void linearSpline(Array *base, Array *x) {
+	double left, right, A, B;
 
-	// double baseStep = (double) base->length / x->length;
-	// double currentStep = baseStep;
+	Array a; initArray(&a);
+	Array b; initArray(&b);
 
-	// Array newBase; 
-	// initArray(&newBase);
+	// Computing Linear Splines
+	for(int i=1; i < x->length; i++) {
+		left = x->data[i-1];
+		right = x->data[i];
 
-	// for(int i=0; i < x->length; i++) {
-	// 	double element = getSplineElement(currentStep, *base, b, c, d);
-	// 	addElement(&newBase, element);
-	// 	currentStep += baseStep;
-	// }
+		A = right - left;
+		B = right - A * i;
 
-	// freeArray(*base);
-	// *base = copyArray(newBase);
+		addElement(&a, A);
+		addElement(&b, B);
+	}
 
-	// freeArray(newBase);
-	// freeArray(b);
-	// freeArray(c);
-	// freeArray(d);
+	// Interpolation
+	Array newX; 
+	initArray(&newX);
+
+	double baseStep = (double) x->length / base->length;
+	double currentStep = baseStep;
+
+	addElement(&newX, base->data[0]); // start with the first element
+	for(int i=1; i < base->length; i++) {
+		int splineIdx = (int) currentStep;
+		A = a.data[splineIdx];
+		B = b.data[splineIdx];
+
+		double element = A * currentStep + B;
+		
+		addElement(&newX, element);
+		currentStep += baseStep;
+	}
+
+	freeArray(*x);
+	*x = copyArray(newX);
+
+
+	freeArray(a);
+	freeArray(b);
+}
+
+
+void interpolate(Array *base, Array *x) {
+	// Mode 1: nonUniformInterpolation
+	//nonUniformInterpolation(base, x);
+
+	// Mode 2: CubicSpline - scaling up
+	cubicSplineScaleUp(base, x);
+	
+
+	// Mode 3: CubicSpline- scaling down
+	//cubicSplineScaleDown(base, x);
+
+	// Mode 4: Linear Spline
+	//linearSpline(base, x);
 }
