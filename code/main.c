@@ -113,19 +113,130 @@ void execute(int argc, char** argv) {
 }
 
 int main(int argc, char** argv) {
-	execute(argc, argv);
+	char *filename1, *filename2, *threshold1, *threshold2;
+	Array anglesF1T1, anglesF2T2;
 
+	printf("Type in your choice:\n"
+		   "  0 - test threshold on image\n"
+		   "  1 - correlate 2 images\n"
+		   "  2 - search for best threshold value\n"
+		   "  3 - count frequency of a letter in a page\n\n"
+		   "Answer: ");
 
-	// Array base, x;
-	// initArray(&x);
-	// addElement(&x, 0);
-	// addElement(&x, 3);
-	// addElement(&x, 2);
-	// addElement(&x, 4);
-	// addElement(&x, 3);
-	// addElement(&x, 2);
+	int choice;
+	scanf("%d", &choice);
 
-	// interpolate(&base, &x);
+	printf("\n");
+
+	switch(choice) {
+		case 0:
+			printf("Usage:\n");
+			printf("  File Name: ");
+			filename1 = calloc(100, sizeof(char)); 
+			scanf("%s", filename1);
+
+			printf("  Threshold: ");
+			threshold1 = calloc(4, sizeof(char)); 
+			scanf("%s", threshold1);
+
+			putchar('\n');
+			anglesF1T1 = flattenImage(filename1, threshold1);
+
+			freeArray(anglesF1T1);
+			free(filename1);
+			free(threshold1);
+
+			break;
+
+		case 1:
+			/* Read First Image. */
+			printf("Usage:\n");
+			printf("  File Name F1: ");
+			filename1 = calloc(100, sizeof(char)); 
+			scanf("%s", filename1);
+
+			printf("  Threshold T1: ");
+			threshold1 = calloc(4, sizeof(char)); 
+			scanf("%s", threshold1);
+
+			/* Read Second Image. */
+			printf("  File Name F2: ");
+			filename2 = calloc(100, sizeof(char)); 
+			scanf("%s", filename2);
+
+			printf("  Threshold T2: ");
+			threshold2 = calloc(4, sizeof(char)); 
+			scanf("%s", threshold2);
+
+			/* Create contour lines. */
+			putchar('\n');
+			anglesF1T1 = flattenImage(filename1, threshold1);
+			anglesF2T2 = flattenImage(filename2, threshold2);
+
+			/* Correlate. */
+			correlateArrays(anglesF1T1, anglesF2T2);
+
+			/* Free memory. */
+			freeArray(anglesF1T1);
+			freeArray(anglesF2T2);
+			free(filename1);
+			free(filename2);
+			free(threshold1);
+			free(threshold2);
+
+			break;
+
+		case 2:
+			/* Read First Image. */
+			printf("Usage:\n");
+			printf("  File Name F1: ");
+			char *filename1 = calloc(100, sizeof(char)); 
+			scanf("%s", filename1);
+
+			printf("  Threshold T1: ");
+			char *threshold1 = calloc(4, sizeof(char)); 
+			scanf("%s", threshold1);
+
+			/* Read Second Image - only the file name. */
+			printf("  File Name F2: ");
+			char *filename2 = calloc(100, sizeof(char)); 
+			scanf("%s", filename2);
+
+			putchar('\n');
+			anglesF1T1 = flattenImage(filename1, threshold1);
+
+			/* It will test all relevant thresholds, printing the best match. */
+			int threshold = 0;
+			double currentCorr = 0.0, maxCorr = 0.0;
+			for(int i=100; i < 170; i++) {
+				char *thresholdString = intToStr(i);
+				anglesF2T2 = flattenImage(filename2, thresholdString);
+				currentCorr = correlateArrays(anglesF1T1, anglesF2T2);
+				if(currentCorr > maxCorr) {
+					maxCorr = currentCorr;
+					threshold = i;
+				}
+
+				freeArray(anglesF2T2);
+				free(thresholdString);
+			}
+			fprintf(stdout, "Best Correlation = %lf with threshold = %d\n\n", maxCorr, threshold);
+
+			/* Free memory. */
+			freeArray(anglesF1T1);
+			free(filename1);
+			free(filename2);
+			free(threshold1);
+
+			break;
+
+		case 3:
+
+			break;
+	}
+
+	
+
 
 	return 0;
 }
