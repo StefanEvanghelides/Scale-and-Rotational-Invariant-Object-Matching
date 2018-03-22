@@ -123,6 +123,26 @@ void writePGM(PGMImage image, char filename[]) {
 	fclose(file);
 }
 
+/* Extracts subimage from a larger image.
+ * PRE: nextRow and colRow should not be out of bounds. */
+PGMImage extractSubImage(PGMImage image, int currentRow, int currentCol, int nextRow, int nextCol) {
+	int type = image.type;
+	int width = nextCol - currentCol;
+	int height = nextRow - currentRow;
+	int maxVal = image.maxVal;
+
+	PGMImage subImage = initializePGMImage(type, width, height, maxVal);
+
+	for(int i = 0; i < height; i++) {
+		for(int j = 0; j < width; j++) {
+			subImage.data[i][j] = image.data[i + currentRow][j + currentCol];
+		}
+	}
+
+	return subImage;
+}
+
+
 /* Prints Image on the standard output. */
 void printImage(PGMImage image) {
 	int row, col, nextValue;

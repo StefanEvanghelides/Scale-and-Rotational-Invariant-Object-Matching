@@ -324,8 +324,6 @@ Array createContour(PGMImage image, int threshold) {
 	} while(!reachedStartingPoint(row, col, startX, startY) && isInBounds(row, col, image.height, image.width)
 		&& (++count) < image.height * image. width);
 
-	fprintf(stdout, "Length = %d\n", count);
-
 	/* Having the array of angles, compute the array of delta's. */
 	int idx = angles.length-1;
 	while (idx > 1) {

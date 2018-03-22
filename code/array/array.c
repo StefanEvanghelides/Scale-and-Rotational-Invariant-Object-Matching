@@ -43,7 +43,7 @@ void popElement(Array *x) {
 
 /* Print the array on the standard output. */
 void printArray(Array array) {
-	fprintf(stdout, "[");
+	fprintf(stdout, "Legnth = %d\n[", array.length);
 	for(int i = 0; i < array.length - 1; i++) {
 		fprintf(stdout, "%.2f, ", array.data[i]);
 	}
