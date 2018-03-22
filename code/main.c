@@ -71,30 +71,55 @@ int getCurrentRow(PGMImage image, int threshold, int prevRow) {
 		}
 
 		if(ok) currentRow++;
-		else break;;
+		else break;
 	}
 
-	return currentRow;
+	return (currentRow == -1 ? 0 : currentRow);
 }
 
 int getNextRow(PGMImage image, int threshold, int currentRow) {
-	int nextRow = currentRow;
+	int nextRow = currentRow + 1;
+	
 	while(nextRow < image.height) {
-		nextRow++;
+		int ok = 0;
+		for(int j=0; j < image.width; j++) {
+			if(image.data[nextRow][j] >= threshold) ok = 1;
+		}
+
+		if(ok) nextRow++;
+		else break;
 	}
 
 	return nextRow;
 }
 
 int getCurrentCol(PGMImage image, int threshold, int currentRow, int nextRow, int prevCol) {
+	int currentCol = prevCol - 1;
 
+	while(currentCol + 1 < image.width) {
+		int ok = 1;
+		for(int i = currentRow; i < nextRow; i++) {
+			if(image.data[i][currentCol+1] >= threshold) ok = 0;
+		}
+
+		if(ok) currentCol++;
+		else break;		
+	}
+
+	return (currentCol == -1 ? 0 : currentCol);
 }
 
 int getNextCol(PGMImage image, int threshold, int currentRow, int nextRow, int currentCol) {
-	int nextCol = currentCol;
+	int nextCol = currentCol + 1;
 
 	while(nextCol < image.width) {
-		nextCol++;
+		int ok = 0;
+		for(int i = currentRow; i < nextRow; i++) {
+			if(image.data[i][nextCol] >= threshold) ok = 1;
+		}
+
+		if(ok) nextCol++;
+		else break;		
 	}
 
 	return nextCol;
@@ -102,6 +127,7 @@ int getNextCol(PGMImage image, int threshold, int currentRow, int nextRow, int c
 
 int main(int argc, char** argv) {
 	char *filename, *filename2, *threshold, *threshold2;
+	int thresholdInt;
 	Array anglesF1T1, anglesF2T2;
 	PGMImage image;
 
@@ -209,7 +235,7 @@ int main(int argc, char** argv) {
 			freePGM(image);
 
 			/* It will test all relevant thresholds, printing the best match. */
-			int thresholdInt = 0;
+			thresholdInt = 0;
 			double currentCorr = 0.0, maxCorr = 0.0;
 			image = readPGM(filename2);
 			for(int i=100; i < 170; i++) {
@@ -264,25 +290,32 @@ int main(int argc, char** argv) {
 			/* Split page in multiple components. */
 			image = readPGM(filename2);
 			int prevRow=0, prevCol=0, currentRow, currentCol, nextRow, nextCol;
-			int thresholdInt = atoi(threshold2);
-			while(currentRow < image.height) {
+			thresholdInt = atoi(threshold2);
+			int count = 0;
+
+			while(prevRow < image.height) {
 				/* Get next row. */
 				currentRow = getCurrentRow(image, thresholdInt, prevRow);
 				nextRow = getNextRow(image, thresholdInt, currentRow);
 
-				while(currentCol < image.width) {
+				while(prevCol < image.width) {
 					/* Get next column. */
 					currentCol = getCurrentCol(image, thresholdInt, currentRow, nextRow, prevCol);
 					nextCol = getNextCol(image, thresholdInt, currentRow, nextRow, currentCol);
-					
+
 					/* Extract letter from page. */
 					PGMImage subImage = extractSubImage(image, currentRow, currentCol, nextRow, nextCol);
-					
+
 					/* Create contour of the extracted letter. */
 					anglesF2T2 = flattenImage(subImage, threshold2);
-
 					/* Correlate. */
-					correlateArrays(anglesF1T1, anglesF2T2);
+					
+					double corr = correlateArrays(anglesF1T1, anglesF2T2);
+					fprintf(stdout, "Correlation = %lf\n", corr);
+
+					count++;
+
+					prevCol = nextCol;
 
 					/* Free temp memory. */
 					freeArray(anglesF2T2);
@@ -290,8 +323,10 @@ int main(int argc, char** argv) {
 				}
 
 				/* Current row becomes the new one. */
-				currentRow = nextRow;
+				prevRow = nextRow;
 			}
+
+			printf("Count = %d\n", count);
 
 			/* Free memory. */
 			freeArray(anglesF1T1);
