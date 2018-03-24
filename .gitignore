@@ -46,6 +46,10 @@ ROTATE
 COUNT
 EXTRACT
 
+# Images
+*.png
+*.pgm
+
 
 # Debug files
 *.dSYM/
