@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../pgm/pgm.h"
+#include "../../main/pgm/pgm.h"
 
 char *getFilename(char* initialFilename, int newType) {
 	int length = strlen(initialFilename);

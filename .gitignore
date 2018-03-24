@@ -34,6 +34,7 @@
 
 # Executables
 *.exe
+*.in
 *.out
 *.app
 *.i*86
@@ -42,6 +43,8 @@
 RUN
 CONVERT
 ROTATE
+COUNT
+EXTRACT
 
 
 # Debug files

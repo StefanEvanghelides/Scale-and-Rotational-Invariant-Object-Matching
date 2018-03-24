@@ -1,8 +1,8 @@
 CC=gcc 
 CFLAGS=-Wall
 
-HEADERS = ../pgm/pgm.h
-OBJECTS = convert.o ../pgm/pgm.o
+HEADERS = ../../main/pgm/pgm.h
+OBJECTS = convert.o ../../main/pgm/pgm.o
 
 default: CONVERT
 
