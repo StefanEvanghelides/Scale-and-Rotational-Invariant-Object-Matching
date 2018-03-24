@@ -8,33 +8,6 @@
 #include "correlation/correlation.h"
 #include "interpolation/interpolation.h"
 
-char* intToStr(int x) {
-	char *str = calloc(4, sizeof(char)); // expect 3 digits and the terminating char;
-	int digit, idx = 0;
-	while(x != 0) {
-		digit = x % 10;
-		x /= 10;
-		for(int i=idx; i > 0; i--) {
-			str[i] = str[i-1];
-		}
-		str[0] = digit+'0';
-		idx++;
-	}
-	return str;
-}
-
-/* Flattens a 2D image into a 1D array of angles, by storing the angles of the edges,
- * based on the Marching Squares algorithm. */
-Array flattenImage(PGMImage image, char *thresholdString) {
-	int threshold = (int) strtol(thresholdString, NULL, 10);
-	if(threshold < 1 || threshold > 255) {
-		fprintf(stderr, "Invalid Threshold! Threshold = %d\n\n", threshold);
-		exit(-1);
-	}
-
-	return createContour(image, threshold);
-}
-
 double correlateArrays(Array anglesF1T1, Array anglesF2T2) {
 	double corr = -1.0; 
 
@@ -137,233 +110,246 @@ int getNextCol(PGMImage image, int threshold, int currentRow, int nextRow, int c
 	return nextCol;
 }
 
-int main(int argc, char** argv) {
-	char *filename, *filename2, *threshold, *threshold2;
-	int thresholdInt;
-	double correlation;
-	Array anglesF1T1, anglesF2T2;
+void thresholdOneImage() {
+	Array angles;
+	char* filename;
+	int threshold;
 	PGMImage image;
 
+	/* Read name of the file. */
+	fprintf(stdout, "Usage:\n");
+	fprintf(stdout, "  File Name: ");
+	filename = calloc(100, sizeof(char)); 
+	scanf("%s", filename);
+
+	/* Read threshold. */
+	fprintf(stdout, "  Threshold: ");
+	scanf("%d", &threshold);
+
+	/* Read the image, convert it to a 1D array and print the array. */
+	putchar('\n');
+	image = readPGM(filename);
+	angles = createContour(image, threshold);
+	fprintf(stdout, "%s: \n", filename);
+	printArray(angles);
+
+	/* Free memory. */
+	freeArray(angles);
+	freePGM(image);
+	free(filename);
+}
+
+void correlateTwoImages() {
+	Array anglesF1T1, anglesF2T2;
+	char *filename, *filename2;
+	int threshold, threshold2;
+	PGMImage image;
+	double correlation;
+
+	/* Read First Image. */
+	fprintf(stdout, "Usage:\n");
+	fprintf(stdout, "  File Name F1: ");
+	filename = calloc(100, sizeof(char)); 
+	scanf("%s", filename);
+
+	fprintf(stdout, "  Threshold T1: ");
+	scanf("%d", &threshold);
+
+	/* Read Second Image. */
+	fprintf(stdout, "  File Name F2: ");
+	filename2 = calloc(100, sizeof(char)); 
+	scanf("%s", filename2);
+
+	fprintf(stdout, "  Threshold T2: "); 
+	scanf("%d", &threshold2);
+
+	/* Create contour lines. */
+	putchar('\n');
+	image = readPGM(filename);
+	anglesF1T1 = createContour(image, threshold);
+	freePGM(image);
+
+	image = readPGM(filename2);
+	anglesF2T2 = createContour(image, threshold2);
+	freePGM(image);
+
+	/* Correlate. */
+	correlation = correlateArrays(anglesF1T1, anglesF2T2);
+	fprintf(stdout, "\nCorrelation: %lf\n\n", correlation);
+
+	/* Free memory. */
+	freeArray(anglesF1T1);
+	freeArray(anglesF2T2);
+	free(filename);
+	free(filename2);
+}
+
+void searchForBestThreshold() {
+	Array anglesF1T1, anglesF2T2;
+	char *filename, *filename2;
+	int threshold, bestThreshold;
+	PGMImage image;
+	double correlation, maxCorr;
+
+	/* Read First Image. */
+	fprintf(stdout, "Usage:\n");
+	fprintf(stdout, "  File Name F1: ");
+	filename = calloc(100, sizeof(char)); 
+	scanf("%s", filename);
+
+	fprintf(stdout, "  Threshold T1: ");
+	scanf("%d", &threshold);
+
+	/* Read Second Image - only the file name. */
+	fprintf(stdout, "  File Name F2: ");
+	filename2 = calloc(100, sizeof(char)); 
+	scanf("%s", filename2);
+
+
+	putchar('\n');
+	image = readPGM(filename);
+	anglesF1T1 = createContour(image, threshold);
+	freePGM(image);
+
+	/* It will test all relevant thresholds, printing the best match. */
+	maxCorr = 0.0;
+	image = readPGM(filename2);
+	for(int i=100; i < 170; i++) {
+		anglesF2T2 = createContour(image, i);
+		correlation = correlateArrays(anglesF1T1, anglesF2T2);
+		if(correlation > maxCorr) {
+			maxCorr = correlation;
+			bestThreshold = i;
+		}
+
+		freeArray(anglesF2T2);
+	}
+	fprintf(stdout, "Best Correlation = %lf with threshold = %d\n\n", maxCorr, bestThreshold);
+
+	/* Free memory. */
+	freeArray(anglesF1T1);
+	freePGM(image);
+	free(filename);
+	free(filename2);
+}
+
+void countLetterOccurences() {
+	Array anglesF1T1, anglesF2T2;
+	char *filename, *filename2;
+	PGMImage image;
+	int prevRow, prevCol, currentRow, currentCol, nextRow, nextCol;
+	int threshold, threshold2, count;
+	double correlation;
+
+	/* Read Image. */
+	fprintf(stdout, "Usage:\n");
+	fprintf(stdout, "  File Name: ");
+	filename = calloc(100, sizeof(char)); 
+	scanf("%s", filename);
+
+	fprintf(stdout, "  Threshold: ");
+	scanf("%d", &threshold);
+
+	/* Read Page. */
+	fprintf(stdout, "  Page Name: ");
+	filename2 = calloc(100, sizeof(char)); 
+	scanf("%s", filename2);
+
+	fprintf(stdout, "  Threshold: ");
+	scanf("%d", &threshold2);
+
+	/* Set the correlation level. */
+	fprintf(stdout, "  Correlation: ");
+	scanf("%lf", &correlation);
+
+	/* Create contour line of the image. */
+	putchar('\n');
+	image = readPGM(filename);
+	anglesF1T1 = createContour(image, threshold);
+	freePGM(image);
+
+	/* Split page in multiple components. */
+	image = readPGM(filename2);
+	prevRow=0; prevCol=0;
+	count = 0;
+	while(prevRow < image.height) {
+		/* Get next row. */
+		currentRow = getCurrentRow(image, threshold2, prevRow);
+		nextRow = getNextRow(image, threshold2, currentRow);
+
+		printf("currentRow = %d, nextRow = %d\n", currentRow, nextRow);
+
+		while(prevCol < image.width) {
+			/* Get next column. */
+			currentCol = getCurrentCol(image, threshold2, currentRow, nextRow, prevCol);
+			nextCol = getNextCol(image, threshold2, currentRow, nextRow, currentCol);
+
+			printf("currentCol = %d, nextCol = %d\n", currentCol, nextCol);
+
+
+			/* Extract letter from page. */
+			PGMImage subImage = extractSubImage(image, currentRow, currentCol, nextRow, nextCol);
+
+			/* Create contour of the extracted letter. */
+			anglesF2T2 = createContour(subImage, threshold2);
+			/* Correlate. */
+			
+			correlation = correlateArrays(anglesF1T1, anglesF2T2);
+			fprintf(stdout, "Correlation = %lf\n", correlation);
+
+			count++;
+
+			prevCol = nextCol;
+
+			/* Free temp memory. */
+			freeArray(anglesF2T2);
+			freePGM(subImage);
+
+			break;
+		}
+
+		/* Current row becomes the new one. */
+		prevRow = nextRow;
+	}
+
+	printf("Count = %d\n", count);
+
+	/* Free memory. */
+	freeArray(anglesF1T1);
+	freePGM(image);
+	free(filename);
+	free(filename2);
+}
+
+int main(int argc, char** argv) {
 	fprintf(stdout, "Type in your choice:\n"
 		   			"  1 - test threshold on image\n"
 		   			"  2 - correlate 2 images\n"
 		   			"  3 - search for best threshold value\n"
-		   			"  4 - count frequency of a letter in a page\n\n"
+		   			"  4 - count occurences of a letter in a page\n\n"
 		   			"  0 - EXIT\n\n"
 		   			"Answer: ");
 
 	int choice;
 	scanf("%d", &choice);
 
-	printf("\n");
+	fprintf(stdout, "\n");
 
 	switch(choice) {
 		case 1:
-			fprintf(stdout, "Usage:\n");
-			fprintf(stdout, "  File Name: ");
-			filename = calloc(100, sizeof(char)); 
-			scanf("%s", filename);
-
-			fprintf(stdout, "  Threshold: ");
-			threshold = calloc(4, sizeof(char)); 
-			scanf("%s", threshold);
-
-			putchar('\n');
-			image = readPGM(filename);
-			anglesF1T1 = flattenImage(image, threshold);
-			fprintf(stdout, "%s: \n", filename);
-			printArray(anglesF1T1);
-
-			freeArray(anglesF1T1);
-			freePGM(image);
-			free(filename);
-			free(threshold);
-
+			thresholdOneImage();
 			break;
 
 		case 2:
-			/* Read First Image. */
-			fprintf(stdout, "Usage:\n");
-			fprintf(stdout, "  File Name F1: ");
-			filename = calloc(100, sizeof(char)); 
-			scanf("%s", filename);
-
-			fprintf(stdout, "  Threshold T1: ");
-			threshold = calloc(4, sizeof(char)); 
-			scanf("%s", threshold);
-
-			/* Read Second Image. */
-			fprintf(stdout, "  File Name F2: ");
-			filename2 = calloc(100, sizeof(char)); 
-			scanf("%s", filename2);
-
-			fprintf(stdout, "  Threshold T2: ");
-			threshold2 = calloc(4, sizeof(char)); 
-			scanf("%s", threshold2);
-
-			/* Create contour lines. */
-			putchar('\n');
-			image = readPGM(filename);
-			anglesF1T1 = flattenImage(image, threshold);
-			freePGM(image);
-
-			image = readPGM(filename2);
-			anglesF2T2 = flattenImage(image, threshold2);
-			freePGM(image);
-
-			/* Correlate. */
-			correlation = correlateArrays(anglesF1T1, anglesF2T2);
-			fprintf(stdout, "\nCorrelation: %lf\n\n", correlation);
-
-			/* Free memory. */
-			freeArray(anglesF1T1);
-			freeArray(anglesF2T2);
-			free(filename);
-			free(filename2);
-			free(threshold);
-			free(threshold2);
-
+			correlateTwoImages();
 			break;
 
 		case 3:
-			/* Read First Image. */
-			fprintf(stdout, "Usage:\n");
-			fprintf(stdout, "  File Name F1: ");
-			filename = calloc(100, sizeof(char)); 
-			scanf("%s", filename);
-
-			fprintf(stdout, "  Threshold T1: ");
-			threshold = calloc(4, sizeof(char)); 
-			scanf("%s", threshold);
-
-			/* Read Second Image - only the file name. */
-			fprintf(stdout, "  File Name F2: ");
-			filename2 = calloc(100, sizeof(char)); 
-			scanf("%s", filename2);
-
-
-			putchar('\n');
-			image = readPGM(filename);
-			anglesF1T1 = flattenImage(image, threshold);
-			freePGM(image);
-
-			/* It will test all relevant thresholds, printing the best match. */
-			thresholdInt = 0;
-			double maxCorr = 0.0;
-			image = readPGM(filename2);
-			for(int i=100; i < 170; i++) {
-				threshold2 = intToStr(i);
-				anglesF2T2 = flattenImage(image, threshold2);
-				correlation = correlateArrays(anglesF1T1, anglesF2T2);
-				if(correlation > maxCorr) {
-					maxCorr = correlation;
-					thresholdInt = i;
-				}
-
-				freeArray(anglesF2T2);
-				free(threshold2);
-			}
-			fprintf(stdout, "Best Correlation = %lf with threshold = %d\n\n", maxCorr, thresholdInt);
-
-			/* Free memory. */
-			freeArray(anglesF1T1);
-			freePGM(image);
-			free(filename);
-			free(filename2);
-			free(threshold);
-
+			searchForBestThreshold();
 			break;
 
 		case 4:
-			/* Read Image. */
-			fprintf(stdout, "Usage:\n");
-			fprintf(stdout, "  File Name: ");
-			filename = calloc(100, sizeof(char)); 
-			scanf("%s", filename);
-
-			fprintf(stdout, "  Threshold: ");
-			threshold= calloc(4, sizeof(char)); 
-			scanf("%s", threshold);
-
-			/* Read Page. */
-			fprintf(stdout, "  Page Name: ");
-			filename2 = calloc(100, sizeof(char)); 
-			scanf("%s", filename2);
-
-			fprintf(stdout, "  Threshold: ");
-			threshold2 = calloc(4, sizeof(char)); 
-			scanf("%s", threshold2);
-
-			/* Set the correlation level. */
-			fprintf(stdout, "  Correlation: ");
-			scanf("%lf", &correlation);
-
-
-
-
-			/* Create contour line of the image. */
-			putchar('\n');
-			image = readPGM(filename);
-			anglesF1T1 = flattenImage(image, threshold);
-			freePGM(image);
-
-			/* Split page in multiple components. */
-			image = readPGM(filename2);
-			int prevRow=0, prevCol=0, currentRow, currentCol, nextRow, nextCol;
-			thresholdInt = atoi(threshold2);
-			int count = 0;
-
-			while(prevRow < image.height) {
-				/* Get next row. */
-				currentRow = getCurrentRow(image, thresholdInt, prevRow);
-				nextRow = getNextRow(image, thresholdInt, currentRow);
-
-				printf("currentRow = %d, nextRow = %d\n", currentRow, nextRow);
-
-				while(prevCol < image.width) {
-					/* Get next column. */
-					currentCol = getCurrentCol(image, thresholdInt, currentRow, nextRow, prevCol);
-					nextCol = getNextCol(image, thresholdInt, currentRow, nextRow, currentCol);
-
-					printf("currentCol = %d, nextCol = %d\n", currentCol, nextCol);
-
-
-					/* Extract letter from page. */
-					PGMImage subImage = extractSubImage(image, currentRow, currentCol, nextRow, nextCol);
-
-					/* Create contour of the extracted letter. */
-					anglesF2T2 = flattenImage(subImage, threshold2);
-					/* Correlate. */
-					
-					double corr = correlateArrays(anglesF1T1, anglesF2T2);
-					fprintf(stdout, "Correlation = %lf\n", corr);
-
-					count++;
-
-					prevCol = nextCol;
-
-					/* Free temp memory. */
-					freeArray(anglesF2T2);
-					freePGM(subImage);
-
-					break;
-				}
-
-				/* Current row becomes the new one. */
-				prevRow = nextRow;
-			}
-
-			printf("Count = %d\n", count);
-
-			/* Free memory. */
-			freeArray(anglesF1T1);
-			freePGM(image);
-			free(filename);
-			free(filename2);
-			free(threshold);
-			free(threshold2);
-
-
+			countLetterOccurences();
 			break;
 
 		default: break; /* Case 0 - Simply exit. */
