@@ -74,7 +74,7 @@ int getCurrentRow(PGMImage image, int threshold, int prevRow) {
 		if(count < minCount) {
 			minCount = count;
 			currentRow++;
-		} else if(minCount < image.width / 10) break;
+		} else if(minCount < image.width / 8) break;
 	}
 
 	return currentRow;
@@ -93,7 +93,7 @@ int getNextRow(PGMImage image, int threshold, int currentRow) {
 		if(count < minCount) {
 			minCount = count;
 			nextRow++;
-		} else if(minCount < image.width / 10) break;
+		} else if(minCount < image.width / 8) break;
 	}
 
 	return nextRow;
