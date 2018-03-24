@@ -128,6 +128,14 @@ int getNextCol(PGMImage image, int threshold, int currentRow, int nextRow, int c
 	return nextCol;
 }
 
+void splitRows() {
+
+}
+
+void splitCols() {
+
+}
+
 void thresholdOneImage() {
 	Array angles;
 	char* filename;
@@ -285,17 +293,22 @@ void countLetterOccurences() {
 	count = 0;
 	while(prevRow < image.height) {
 		/* Get next row. */
-		currentRow = getCurrentRow(image, threshold2, prevRow);
-		nextRow = getNextRow(image, threshold2, currentRow);
+		// currentRow = getCurrentRow(image, threshold2, prevRow);
+		// nextRow = getNextRow(image, threshold2, currentRow);
 
-		printf("currentRow = %d, nextRow = %d\n", currentRow, nextRow);
+		// printf("currentRow = %d, nextRow = %d\n", currentRow, nextRow);
+
+		splitRows();
 
 		while(prevCol < image.width) {
-			/* Get next column. */
-			currentCol = getCurrentCol(image, threshold2, currentRow, nextRow, prevCol);
-			nextCol = getNextCol(image, threshold2, currentRow, nextRow, currentCol);
+			// /* Get next column. */
+			// currentCol = getCurrentCol(image, threshold2, currentRow, nextRow, prevCol);
+			// nextCol = getNextCol(image, threshold2, currentRow, nextRow, currentCol);
 
-			printf("currentCol = %d, nextCol = %d\n", currentCol, nextCol);
+			// printf("currentCol = %d, nextCol = %d\n", currentCol, nextCol);
+
+
+			splitCols();
 
 
 			/* Extract letter from page. */
