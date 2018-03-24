@@ -8,6 +8,24 @@
 #include "correlation/correlation.h"
 #include "interpolation/interpolation.h"
 
+char* readFileName() {
+	char *array = calloc(2, sizeof(char));
+	int len = 0;
+	int maxSize = 2;
+
+	char c = getchar();
+	while((c = getchar()) != '\n') {
+		if(len + 1 == maxSize) {
+			maxSize *= 2;
+			array = realloc(array, maxSize * sizeof(char));
+		}
+		array[len] = c;
+		len++;
+	}
+
+	return array;
+}
+
 double correlateArrays(Array anglesF1T1, Array anglesF2T2) {
 	double corr = -1.0; 
 
@@ -119,8 +137,7 @@ void thresholdOneImage() {
 	/* Read name of the file. */
 	fprintf(stdout, "Usage:\n");
 	fprintf(stdout, "  File Name: ");
-	filename = calloc(100, sizeof(char)); 
-	scanf("%s", filename);
+	filename = readFileName();
 
 	/* Read threshold. */
 	fprintf(stdout, "  Threshold: ");
@@ -149,16 +166,14 @@ void correlateTwoImages() {
 	/* Read First Image. */
 	fprintf(stdout, "Usage:\n");
 	fprintf(stdout, "  File Name F1: ");
-	filename = calloc(100, sizeof(char)); 
-	scanf("%s", filename);
+	filename = readFileName();
 
 	fprintf(stdout, "  Threshold T1: ");
 	scanf("%d", &threshold);
 
 	/* Read Second Image. */
 	fprintf(stdout, "  File Name F2: ");
-	filename2 = calloc(100, sizeof(char)); 
-	scanf("%s", filename2);
+	filename2 = readFileName();
 
 	fprintf(stdout, "  Threshold T2: "); 
 	scanf("%d", &threshold2);
@@ -194,18 +209,16 @@ void searchForBestThreshold() {
 	/* Read First Image. */
 	fprintf(stdout, "Usage:\n");
 	fprintf(stdout, "  File Name F1: ");
-	filename = calloc(100, sizeof(char)); 
-	scanf("%s", filename);
+	filename = readFileName();
 
 	fprintf(stdout, "  Threshold T1: ");
 	scanf("%d", &threshold);
 
 	/* Read Second Image - only the file name. */
 	fprintf(stdout, "  File Name F2: ");
-	filename2 = calloc(100, sizeof(char)); 
-	scanf("%s", filename2);
+	filename2 = readFileName();
 
-
+	/* Create contour line of the image. */
 	putchar('\n');
 	image = readPGM(filename);
 	anglesF1T1 = createContour(image, threshold);
@@ -244,16 +257,14 @@ void countLetterOccurences() {
 	/* Read Image. */
 	fprintf(stdout, "Usage:\n");
 	fprintf(stdout, "  File Name: ");
-	filename = calloc(100, sizeof(char)); 
-	scanf("%s", filename);
+	filename = readFileName();
 
 	fprintf(stdout, "  Threshold: ");
 	scanf("%d", &threshold);
 
 	/* Read Page. */
 	fprintf(stdout, "  Page Name: ");
-	filename2 = calloc(100, sizeof(char)); 
-	scanf("%s", filename2);
+	filename2 = readFileName();
 
 	fprintf(stdout, "  Threshold: ");
 	scanf("%d", &threshold2);
