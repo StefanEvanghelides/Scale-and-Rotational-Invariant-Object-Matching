@@ -15,7 +15,8 @@ PGMImage initializePGMImage(int type, int width, int height, int maxVal);
 PGMImage readPGM (char filename[]);
 void writePGM(PGMImage image, char filename[]);
 PGMImage extractSubImage(PGMImage image, int currentrow, int currentCol, int nextRow, int nextCol);
-void printImage(PGMImage image);
+PGMImage getBordedImage(PGMImage image);
+void printPGM(PGMImage image);
 void freePGM(PGMImage image);
 
 #endif

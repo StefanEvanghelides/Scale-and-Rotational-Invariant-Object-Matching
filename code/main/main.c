@@ -54,37 +54,36 @@ double correlateArrays(Array anglesF1T1, Array anglesF2T2) {
 
 int getCurrentRow(PGMImage image, int threshold, int prevRow) {
 	int currentRow = prevRow - 1;
-	int minCount = image.width;
+	int count;
+	int countThreshold = image.height / 5;
 
-	while(currentRow + 1 < image.height) {
-		int count = 0;
+	while(currentRow+1 < image.height) {
+		count = 0;
 		for(int j=0; j < image.width; j++) {
 			if(image.data[currentRow+1][j] < threshold) count++;
 		}
-
-		if(count < minCount) {
-			minCount = count;
-			currentRow++;
-		} else if(minCount < image.width / 8) break;
+		if(count < countThreshold) currentRow++;
+		else break;
 	}
-
 	return currentRow;
 }
 
 int getNextRow(PGMImage image, int threshold, int currentRow) {
 	int nextRow = currentRow;
 	int minCount = image.width;
+	int countThreshold = image.height / 5;
 
-	while(nextRow < image.height) {
+	while(nextRow+1 < image.height) {
 		int count = 0;
 		for(int j=0; j < image.width; j++) {
-			if(image.data[nextRow][j] < threshold) count++;
+			if(image.data[nextRow+1][j] < threshold) count++;
 		}
 
-		if(count < minCount) {
+		if(count > countThreshold) nextRow++;
+		else if(count <= minCount) {
 			minCount = count;
 			nextRow++;
-		} else if(minCount < image.width / 8) break;
+		} else break;
 	}
 
 	return nextRow;
@@ -92,18 +91,17 @@ int getNextRow(PGMImage image, int threshold, int currentRow) {
 
 int getCurrentCol(PGMImage image, int threshold, int currentRow, int nextRow, int prevCol) {
 	int currentCol = prevCol - 1;
-	int minCount = image.height;
+	int count;
+	int countThreshold = (nextRow - currentRow) / 10;
 
-	while(currentCol + 1 < image.width) {
-		int count = 0;
-		for(int i = currentRow; i < nextRow; i++) {
+	while(currentCol+1 < image.width) {
+		count = 0;
+		for(int i=currentRow; i < nextRow; i++) {
 			if(image.data[i][currentCol+1] < threshold) count++;
 		}
 
-		if(count < minCount) {
-			minCount = count;
-			currentCol++;	
-		} else if(minCount < image.height / 10) break;		
+		if(count < countThreshold) currentCol++;
+	 	else break;
 	}
 
 	return currentCol;
@@ -112,17 +110,19 @@ int getCurrentCol(PGMImage image, int threshold, int currentRow, int nextRow, in
 int getNextCol(PGMImage image, int threshold, int currentRow, int nextRow, int currentCol) {
 	int nextCol = currentCol;
 	int minCount = image.height;
+	int countThreshold = (nextRow - currentRow) / 10;
 
-	while(nextCol < image.width) {
+	while(nextCol+1 < image.width) {
 		int count = 0;
 		for(int i = currentRow; i < nextRow; i++) {
-			if(image.data[i][nextCol] < threshold) count++;
+			if(image.data[i][nextCol+1] < threshold) count++;
 		}
 
-		if(minCount > count) {
+		if(count > countThreshold) nextCol++;
+		else if(count <= minCount) {
 			minCount = count;
-			currentCol++;
-		} else if(minCount < image.height / 10) break;	
+			nextCol++;
+		} else break;
 	}
 
 	return nextCol;
@@ -260,7 +260,7 @@ void countLetterOccurences() {
 	PGMImage image;
 	int prevRow, prevCol, currentRow, currentCol, nextRow, nextCol;
 	int threshold, threshold2, count;
-	double correlation;
+	double correlation, correlationThreshold;
 
 	/* Read Image. */
 	fprintf(stdout, "Usage:\n");
@@ -279,7 +279,7 @@ void countLetterOccurences() {
 
 	/* Set the correlation level. */
 	fprintf(stdout, "  Correlation: ");
-	scanf("%lf", &correlation);
+	scanf("%lf", &correlationThreshold);
 
 	/* Create contour line of the image. */
 	putchar('\n');
@@ -289,51 +289,57 @@ void countLetterOccurences() {
 
 	/* Split page in multiple components. */
 	image = readPGM(filename2);
-	prevRow=0; prevCol=0;
 	count = 0;
+	prevRow=0;
 	while(prevRow < image.height) {
+		prevCol=0;
+
 		/* Get next row. */
-		// currentRow = getCurrentRow(image, threshold2, prevRow);
-		// nextRow = getNextRow(image, threshold2, currentRow);
+		currentRow = getCurrentRow(image, threshold2, prevRow);
+		nextRow = getNextRow(image, threshold2, currentRow);
 
-		// printf("currentRow = %d, nextRow = %d\n", currentRow, nextRow);
-
-		splitRows();
+		printf("currentRow = %d, nextRow = %d\n", currentRow, nextRow);
 
 		while(prevCol < image.width) {
-			// /* Get next column. */
-			// currentCol = getCurrentCol(image, threshold2, currentRow, nextRow, prevCol);
-			// nextCol = getNextCol(image, threshold2, currentRow, nextRow, currentCol);
+			/* Get next column. */
+			currentCol = getCurrentCol(image, threshold2, currentRow, nextRow, prevCol);
+			nextCol = getNextCol(image, threshold2, currentRow, nextRow, currentCol);
 
-			// printf("currentCol = %d, nextCol = %d\n", currentCol, nextCol);
-
-
-			splitCols();
-
+			printf("currentCol = %d, nextCol = %d\n", currentCol, nextCol);
 
 			/* Extract letter from page. */
 			PGMImage subImage = extractSubImage(image, currentRow, currentCol, nextRow, nextCol);
+			PGMImage bordedSubImage = getBordedImage(subImage);
 
 			/* Create contour of the extracted letter. */
-			anglesF2T2 = createContour(subImage, threshold2);
+			anglesF2T2 = createContour(bordedSubImage, threshold2);
 			/* Correlate. */
 			
 			correlation = correlateArrays(anglesF1T1, anglesF2T2);
 			fprintf(stdout, "Correlation = %lf\n", correlation);
 
-			count++;
+			if(correlation >= correlationThreshold) count++;
 
 			prevCol = nextCol;
 
 			/* Free temp memory. */
 			freeArray(anglesF2T2);
 			freePGM(subImage);
+			freePGM(bordedSubImage);
 
 			break;
+
+			if(currentCol == nextCol) break;
 		}
+
+		printf("count = %d\n", count);
 
 		/* Current row becomes the new one. */
 		prevRow = nextRow;
+
+		//break;
+
+		if(currentRow == nextRow) break;
 	}
 
 	printf("Count = %d\n", count);

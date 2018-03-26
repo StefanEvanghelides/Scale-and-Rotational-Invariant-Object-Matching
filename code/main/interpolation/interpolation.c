@@ -215,11 +215,11 @@ void interpolate(Array *base, Array *x) {
 	//nonUniformInterpolation(base, x);
 
 	// Mode 2: CubicSpline - scaling up
-	//cubicSplineScaleUp(base, x);
+	cubicSplineScaleUp(base, x);
 	
 
 	// Mode 3: CubicSpline- scaling down
-	cubicSplineScaleDown(base, x);
+	//cubicSplineScaleDown(base, x);
 
 	// Mode 4: Linear Spline
 	//linearSpline(base, x);

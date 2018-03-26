@@ -14,8 +14,8 @@ PGMImage initializePGMImage(int type, int width, int height, int maxVal) {
 	image.maxVal = maxVal;
 	
 	/* Initialize 2D array for reading the data.*/
-	image.data = malloc(height * sizeof(int*));
-	image.data[0] = malloc(width * height * sizeof(int*));
+	image.data = calloc(height, sizeof(int*));
+	image.data[0] = calloc(width * height, sizeof(int*));
 	for(row = 1; row < height; row++) {
 		image.data[row] = image.data[row-1] + image.width;
 	}
@@ -142,9 +142,38 @@ PGMImage extractSubImage(PGMImage image, int currentRow, int currentCol, int nex
 	return subImage;
 }
 
+PGMImage getBordedImage(PGMImage image) {
+	int type = image.type;
+	int height = image.height + 2;
+	int width = image.width + 2;
+	int maxVal = image.maxVal;
+
+	PGMImage newImage = initializePGMImage(type, width, height, maxVal);
+
+	/* Set up the border. */
+	for(int j=0; j<width; j++) { // Top and Bottom border
+		newImage.data[0][j] = 255;
+		newImage.data[height-1][j] = 255;
+	}
+
+	for(int i=0; i<height; i++) { // Left and Right
+		newImage.data[i][0] = 255;
+		newImage.data[i][width-1] = 255;
+	}
+
+	/* Copy the rest of the content. */
+	for(int i=0; i<image.height; i++) {
+		for(int j=0; j<image.width; j++) {
+			newImage.data[i+1][j+1] = image.data[i][j];
+		}
+	}
+
+	return newImage;
+}
+
 
 /* Prints Image on the standard output. */
-void printImage(PGMImage image) {
+void printPGM(PGMImage image) {
 	int row, col, nextValue;
 	
 	fprintf(stdout, "Printing Image...\n");
