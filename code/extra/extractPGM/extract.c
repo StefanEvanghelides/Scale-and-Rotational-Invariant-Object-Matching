@@ -28,8 +28,8 @@ int main(int argc, char ** argv) {
 
 	printf("Image name: "); scanf("%s", imageName);
 	printf("Current Row: "); scanf("%d", &currentRow);
-	printf("Current Col: "); scanf("%d", &currentCol);
 	printf("Next Row: "); scanf("%d", &nextRow);
+	printf("Current Col: "); scanf("%d", &currentCol);
 	printf("Next Col: "); scanf("%d", &nextCol);
 
 	PGMImage image = readPGM(imageName);

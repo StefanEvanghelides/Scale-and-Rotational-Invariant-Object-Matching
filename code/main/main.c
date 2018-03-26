@@ -8,6 +8,14 @@
 #include "correlation/correlation.h"
 #include "interpolation/interpolation.h"
 
+typedef struct Match {
+	int xStart;
+	int xEnd;
+	int yStart;
+	int yEnd;
+	double correlation;
+} Match;
+
 char* readFileName() {
 	char *array = calloc(2, sizeof(char));
 	int len = 0;
@@ -38,10 +46,10 @@ double correlateArrays(Array anglesF1T1, Array anglesF2T2) {
 
 	/* Correlation with Pearson Correlator. */
 	if(copy1.length == copy2.length) {
-		fprintf(stdout, "Arrays have the same length = %d\n", copy1.length);
+		// fprintf(stdout, "Arrays have the same length = %d\n", copy1.length);
 
-		fprintf(stdout, "First:\n"); printArray(copy1);
-		fprintf(stdout, "Second:\n"); printArray(copy2);
+		// fprintf(stdout, "First:\n"); printArray(copy1);
+		// fprintf(stdout, "Second:\n"); printArray(copy2);
 
 		corr = correlation(copy1, copy2);
 	} else fprintf(stderr, "The 2 arrays do not have the same length!\n\n");
@@ -72,6 +80,7 @@ int getNextRow(PGMImage image, int threshold, int currentRow) {
 	int nextRow = currentRow;
 	int minCount = image.width;
 	int countThreshold = image.height / 5;
+	int passedTheRow = 0;
 
 	while(nextRow+1 < image.height) {
 		int count = 0;
@@ -79,10 +88,11 @@ int getNextRow(PGMImage image, int threshold, int currentRow) {
 			if(image.data[nextRow+1][j] < threshold) count++;
 		}
 
-		if(count > countThreshold) nextRow++;
+		if(count > countThreshold && !passedTheRow) nextRow++;
 		else if(count <= minCount) {
 			minCount = count;
 			nextRow++;
+			passedTheRow = 1;
 		} else break;
 	}
 
@@ -100,7 +110,7 @@ int getCurrentCol(PGMImage image, int threshold, int currentRow, int nextRow, in
 			if(image.data[i][currentCol+1] < threshold) count++;
 		}
 
-		if(count < countThreshold) currentCol++;
+		if(count <= countThreshold) currentCol++;
 	 	else break;
 	}
 
@@ -111,6 +121,7 @@ int getNextCol(PGMImage image, int threshold, int currentRow, int nextRow, int c
 	int nextCol = currentCol;
 	int minCount = image.height;
 	int countThreshold = (nextRow - currentRow) / 10;
+	int passedTheLetter = 0;
 
 	while(nextCol+1 < image.width) {
 		int count = 0;
@@ -118,22 +129,15 @@ int getNextCol(PGMImage image, int threshold, int currentRow, int nextRow, int c
 			if(image.data[i][nextCol+1] < threshold) count++;
 		}
 
-		if(count > countThreshold) nextCol++;
+		if(count > countThreshold && !passedTheLetter) nextCol++;
 		else if(count <= minCount) {
 			minCount = count;
 			nextCol++;
+			passedTheLetter = 1;
 		} else break;
 	}
 
 	return nextCol;
-}
-
-void splitRows() {
-
-}
-
-void splitCols() {
-
 }
 
 void thresholdOneImage() {
@@ -259,8 +263,13 @@ void countLetterOccurences() {
 	char *filename, *filename2;
 	PGMImage image;
 	int prevRow, prevCol, currentRow, currentCol, nextRow, nextCol;
-	int threshold, threshold2, count;
+	int threshold, threshold2, countLetters;
 	double correlation, correlationThreshold;
+
+	/* Init arrays of matches. */
+	Match *matches = calloc(1, sizeof(Match));
+	int countMatches = 0;
+	int matchesMaxSize = 1;
 
 	/* Read Image. */
 	fprintf(stdout, "Usage:\n");
@@ -289,7 +298,8 @@ void countLetterOccurences() {
 
 	/* Split page in multiple components. */
 	image = readPGM(filename2);
-	count = 0;
+	countMatches = 0;
+	countLetters = 0;
 	prevRow=0;
 	while(prevRow < image.height) {
 		prevCol=0;
@@ -298,14 +308,12 @@ void countLetterOccurences() {
 		currentRow = getCurrentRow(image, threshold2, prevRow);
 		nextRow = getNextRow(image, threshold2, currentRow);
 
-		printf("currentRow = %d, nextRow = %d\n", currentRow, nextRow);
-
 		while(prevCol < image.width) {
 			/* Get next column. */
 			currentCol = getCurrentCol(image, threshold2, currentRow, nextRow, prevCol);
 			nextCol = getNextCol(image, threshold2, currentRow, nextRow, currentCol);
 
-			printf("currentCol = %d, nextCol = %d\n", currentCol, nextCol);
+			printf("%d  %d  %d  %d\n", currentRow, nextRow, currentCol, nextCol);
 
 			/* Extract letter from page. */
 			PGMImage subImage = extractSubImage(image, currentRow, currentCol, nextRow, nextCol);
@@ -313,44 +321,61 @@ void countLetterOccurences() {
 
 			/* Create contour of the extracted letter. */
 			anglesF2T2 = createContour(bordedSubImage, threshold2);
-			/* Correlate. */
 			
+			/* Correlate. */
 			correlation = correlateArrays(anglesF1T1, anglesF2T2);
-			fprintf(stdout, "Correlation = %lf\n", correlation);
+			fprintf(stdout, "Correlation = %lf\n\n", correlation);
 
-			if(correlation >= correlationThreshold) count++;
+			if(correlation >= correlationThreshold) {
+				if(countMatches == matchesMaxSize) {
+					matchesMaxSize *= 2;
+					matches = realloc(matches, matchesMaxSize * sizeof(Match));
+				}
+
+				matches[countMatches].xStart = currentRow;
+				matches[countMatches].xEnd = nextRow;
+				matches[countMatches].yStart = currentCol;
+				matches[countMatches].yEnd = nextCol;
+				matches[countMatches].correlation = correlation;
+
+				countMatches++;
+			}
 
 			prevCol = nextCol;
+			countLetters++;
 
 			/* Free temp memory. */
 			freeArray(anglesF2T2);
 			freePGM(subImage);
 			freePGM(bordedSubImage);
 
-			break;
+			//break;
 
 			if(currentCol == nextCol) break;
 		}
 
-		printf("count = %d\n", count);
-
-		/* Current row becomes the new one. */
-		prevRow = nextRow;
-
-		//break;
+		prevRow = nextRow;		
 
 		if(currentRow == nextRow) break;
 	}
 
-	printf("Count = %d\n", count);
+	/* Printing results. */
+	fprintf(stdout, "\n\n");
+	fprintf(stdout, "Letters verified = %d\n", countLetters);
+	fprintf(stdout, "Matches = %d\n", countMatches);
+	for(int i=0; i<countMatches; i++) {
+		fprintf(stdout, "  Match #%d: %d %d %d %d -> corr = %lf\n", i, matches[i].xStart, matches[i].xEnd, matches[i].yStart, matches[i].yEnd, matches[i].correlation);
+	}
 
 	/* Free memory. */
 	freeArray(anglesF1T1);
 	freePGM(image);
 	free(filename);
 	free(filename2);
+	free(matches);
 }
 
+/* Main function. Executes the program according to the input. */
 int main(int argc, char** argv) {
 	fprintf(stdout, "Type in your choice:\n"
 		   			"  1 - test threshold on image\n"
