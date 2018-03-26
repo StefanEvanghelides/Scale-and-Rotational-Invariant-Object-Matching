@@ -152,13 +152,13 @@ PGMImage getBordedImage(PGMImage image) {
 
 	/* Set up the border. */
 	for(int j=0; j<width; j++) { // Top and Bottom border
-		newImage.data[0][j] = 255;
-		newImage.data[height-1][j] = 255;
+		newImage.data[0][j] = 200;
+		newImage.data[height-1][j] = 200;
 	}
 
 	for(int i=0; i<height; i++) { // Left and Right
-		newImage.data[i][0] = 255;
-		newImage.data[i][width-1] = 255;
+		newImage.data[i][0] = 200;
+		newImage.data[i][width-1] = 200;
 	}
 
 	/* Copy the rest of the content. */
