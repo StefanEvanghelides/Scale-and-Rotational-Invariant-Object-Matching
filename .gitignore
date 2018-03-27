@@ -34,8 +34,6 @@
 
 # Executables
 *.exe
-*.in
-*.out
 *.app
 *.i*86
 *.x86_64
@@ -49,6 +47,11 @@ EXTRACT
 # Images
 *.png
 *.pgm
+
+# Text files
+*.in
+*.out
+*.txt
 
 
 # Debug files
