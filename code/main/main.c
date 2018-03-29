@@ -370,7 +370,9 @@ void countLetterOccurences() {
 	fprintf(stdout, "Matches = %d\n", countMatches);
 	for(int i=0; i<countMatches; i++) {
 		fprintf(stdout, "  Match #%d: %d %d %d %d -> corr = %lf\n", i, matches[i].xStart, matches[i].xEnd, matches[i].yStart, matches[i].yEnd, matches[i].correlation);
+		drawContour(&image, matches[i].xStart, matches[i].xEnd, matches[i].yStart, matches[i].yEnd);
 	}
+	writePGM(image, "process_out.pgm");
 
 	/* Free memory. */
 	freeArray(anglesF1T1);

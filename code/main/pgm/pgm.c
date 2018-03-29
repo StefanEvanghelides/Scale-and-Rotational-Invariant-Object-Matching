@@ -171,6 +171,18 @@ PGMImage getBordedImage(PGMImage image) {
 	return newImage;
 }
 
+void drawContour(PGMImage *image, int rowStart, int rowEnd, int colStart, int colEnd) {
+	for(int i = rowStart; i < rowEnd; i++) {  // Left and Right
+		image->data[i][colStart] = 255;
+		image->data[i][colEnd] = 255;
+	}
+
+	for(int j = colStart; j < colEnd; j++) { // Top and Bottom border
+		image->data[rowStart][j] = 255;
+		image->data[rowEnd][j] = 255;
+	}
+}
+
 
 /* Prints Image on the standard output. */
 void printPGM(PGMImage image) {
