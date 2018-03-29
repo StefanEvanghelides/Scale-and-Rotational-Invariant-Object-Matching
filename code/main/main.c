@@ -8,6 +8,8 @@
 #include "correlation/correlation.h"
 #include "interpolation/interpolation.h"
 
+/* Structure holds the coordinates of an image that was a match
+ * with the mask image. */
 typedef struct Match {
 	int xStart;
 	int xEnd;
@@ -16,6 +18,7 @@ typedef struct Match {
 	double correlation;
 } Match;
 
+/* Reads the name of the file dynamically. */
 char* readFileName() {
 	char *array = calloc(2, sizeof(char));
 	int len = 0;
@@ -34,6 +37,9 @@ char* readFileName() {
 	return array;
 }
 
+/* Compares 2 arrays before correlation. If they have different sizes,
+ * they will be scaled up/down until they have the same length.
+ * When the 2 arrays have the same length, they can be correlated. */
 double correlateArrays(Array anglesF1T1, Array anglesF2T2) {
 	double corr = -1.0; 
 
@@ -47,7 +53,6 @@ double correlateArrays(Array anglesF1T1, Array anglesF2T2) {
 	/* Correlation with Pearson Correlator. */
 	if(copy1.length == copy2.length) {
 		// fprintf(stdout, "Arrays have the same length = %d\n", copy1.length);
-
 		// fprintf(stdout, "First:\n"); printArray(copy1);
 		// fprintf(stdout, "Second:\n"); printArray(copy2);
 
@@ -349,8 +354,6 @@ void countLetterOccurences() {
 			freePGM(subImage);
 			freePGM(bordedSubImage);
 
-			//break;
-
 			if(currentCol == nextCol) break;
 		}
 
@@ -359,13 +362,15 @@ void countLetterOccurences() {
 		if(currentRow == nextRow) break;
 	}
 
-	/* Printing results. */
+	/* Show results and draw boxes. */
 	fprintf(stdout, "\n\n");
 	fprintf(stdout, "Letters verified = %d\n", countLetters);
 	fprintf(stdout, "Matches = %d\n", countMatches);
 	for(int i=0; i<countMatches; i++) {
 		fprintf(stdout, "  Match #%d: %d %d %d %d -> corr = %lf\n", i, matches[i].xStart, matches[i].xEnd, matches[i].yStart, matches[i].yEnd, matches[i].correlation);
+		drawBox(&image, matches[i].xStart, matches[i].xEnd, matches[i].yStart, matches[i].yEnd);
 	}
+	writePGM(image, "process_out.pgm");
 
 	/* Free memory. */
 	freeArray(anglesF1T1);
