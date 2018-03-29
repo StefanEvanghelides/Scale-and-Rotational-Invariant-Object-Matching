@@ -362,7 +362,7 @@ void countLetterOccurences() {
 		if(currentRow == nextRow) break;
 	}
 
-	/* Print results, draw boxes. */
+	/* Show results and draw boxes. */
 	fprintf(stdout, "\n\n");
 	fprintf(stdout, "Letters verified = %d\n", countLetters);
 	fprintf(stdout, "Matches = %d\n", countMatches);
