@@ -5,37 +5,6 @@
 #include "../array/array.h"
 #include "interpolation.h"
 
-/* Stretch array x to have the same size as the base array. */
-void nonUniformInterpolation(Array *base, Array *x) {
-	// Initialize new array
-	Array stretched; initArray(&stretched);
-
-	// Add new values:
-	// for Double step = len(base) / len(x), make sure that every time step reaches 1,
-	//      add an interpolated value into the array
-	double baseStep = (double) base->length / x->length - 1;
-	double currentStep = baseStep;
-	for(int idx=0; idx < x->length; idx++) {
-		while(currentStep >= 1) {
-			// Add the interpolated value
-			if(idx > 0) addElement(&stretched, (x->data[idx-1] + x->data[idx]) / 2);
-			else addElement(&stretched, (x->data[idx] + x->data[x->length - 1]) / 2);	
-
-			currentStep -= 1; // Set currentStep with 1 value lower
-		}
-		addElement(&stretched, x->data[idx]);
-		currentStep += baseStep;
-	}
-
-	// Make x = stretched
-	for(int i = x->length; i<base->length; i++) {
-		addElement(x, 0); //add dummy values to match the length
-	}
-	for(int i=0; i < x->length; i++) {
-		x->data[i] = stretched.data[i];
-	}
-}
-
 /* Compute the components of the cubic spline. */
 void computeCubicSplines(Array *a, Array *b, Array *c, Array *d) {
 
@@ -209,10 +178,10 @@ void linearSpline(Array *base, Array *x) {
 	freeArray(b);
 }
 
-
+/* Performs one of the available interpolation methods. */
 void interpolate(Array *base, Array *x) {
-	// Mode 1: nonUniformInterpolation
-	//nonUniformInterpolation(base, x);
+	// Mode 1: Linear Spline
+	//linearSpline(base, x);
 
 	// Mode 2: CubicSpline - scaling up
 	cubicSplineScaleUp(base, x);
@@ -221,6 +190,4 @@ void interpolate(Array *base, Array *x) {
 	// Mode 3: CubicSpline- scaling down
 	//cubicSplineScaleDown(base, x);
 
-	// Mode 4: Linear Spline
-	//linearSpline(base, x);
 }
