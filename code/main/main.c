@@ -354,8 +354,6 @@ void countLetterOccurences() {
 			freePGM(subImage);
 			freePGM(bordedSubImage);
 
-			//break;
-
 			if(currentCol == nextCol) break;
 		}
 
@@ -364,13 +362,13 @@ void countLetterOccurences() {
 		if(currentRow == nextRow) break;
 	}
 
-	/* Printing results. */
+	/* Print results, draw boxes. */
 	fprintf(stdout, "\n\n");
 	fprintf(stdout, "Letters verified = %d\n", countLetters);
 	fprintf(stdout, "Matches = %d\n", countMatches);
 	for(int i=0; i<countMatches; i++) {
 		fprintf(stdout, "  Match #%d: %d %d %d %d -> corr = %lf\n", i, matches[i].xStart, matches[i].xEnd, matches[i].yStart, matches[i].yEnd, matches[i].correlation);
-		drawContour(&image, matches[i].xStart, matches[i].xEnd, matches[i].yStart, matches[i].yEnd);
+		drawBox(&image, matches[i].xStart, matches[i].xEnd, matches[i].yStart, matches[i].yEnd);
 	}
 	writePGM(image, "process_out.pgm");
 

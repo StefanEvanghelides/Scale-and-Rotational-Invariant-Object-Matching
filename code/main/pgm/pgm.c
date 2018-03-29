@@ -171,7 +171,7 @@ PGMImage getBordedImage(PGMImage image) {
 	return newImage;
 }
 
-void drawContour(PGMImage *image, int rowStart, int rowEnd, int colStart, int colEnd) {
+void drawBox(PGMImage *image, int rowStart, int rowEnd, int colStart, int colEnd) {
 	for(int i = rowStart; i < rowEnd; i++) {  // Left and Right
 		image->data[i][colStart] = 255;
 		image->data[i][colEnd] = 255;

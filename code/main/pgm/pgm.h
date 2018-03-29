@@ -16,7 +16,7 @@ PGMImage readPGM (char filename[]);
 void writePGM(PGMImage image, char filename[]);
 PGMImage extractSubImage(PGMImage image, int currentrow, int currentCol, int nextRow, int nextCol);
 PGMImage getBordedImage(PGMImage image);
-void drawContour(PGMImage *image, int rowStart, int rowEnd, int colStart, int colEnd);
+void drawBox(PGMImage *image, int rowStart, int rowEnd, int colStart, int colEnd);
 void printPGM(PGMImage image);
 void freePGM(PGMImage image);
 
