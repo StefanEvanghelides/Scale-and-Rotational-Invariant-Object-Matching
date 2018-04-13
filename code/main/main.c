@@ -46,6 +46,9 @@ double correlateArrays(Array anglesF1T1, Array anglesF2T2) {
 	Array copy1 = copyArray(anglesF1T1);
 	Array copy2 = copyArray(anglesF2T2);
 
+	// fprintf(stdout, "First:\n"); printArray(copy1);
+	// fprintf(stdout, "Second:\n"); printArray(copy2);
+
 	/* Ensure arrays have the same length. */
 	if(copy1.length > copy2.length && copy2.length != 0) interpolate(&copy1, &copy2);
 	else if(copy1.length < copy2.length && copy1.length != 0) interpolate(&copy2, &copy1);
