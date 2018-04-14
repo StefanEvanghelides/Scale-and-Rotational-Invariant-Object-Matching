@@ -389,7 +389,7 @@ int main(int argc, char** argv) {
 		   			"  1 - test threshold on image\n"
 		   			"  2 - correlate 2 images\n"
 		   			"  3 - search for best threshold value\n"
-		   			"  4 - count occurences of a letter in a page\n\n"
+		   			"  4 - count occurrences of a letter in a page\n\n"
 		   			"  0 - EXIT\n\n"
 		   			"Answer: ");
 
