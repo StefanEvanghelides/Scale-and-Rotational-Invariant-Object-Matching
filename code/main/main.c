@@ -46,6 +46,9 @@ double correlateArrays(Array anglesF1T1, Array anglesF2T2) {
 	Array copy1 = copyArray(anglesF1T1);
 	Array copy2 = copyArray(anglesF2T2);
 
+	// fprintf(stdout, "First:\n"); printArray(copy1);
+	// fprintf(stdout, "Second:\n"); printArray(copy2);
+
 	/* Ensure arrays have the same length. */
 	if(copy1.length > copy2.length && copy2.length != 0) interpolate(&copy1, &copy2);
 	else if(copy1.length < copy2.length && copy1.length != 0) interpolate(&copy2, &copy1);
@@ -367,7 +370,7 @@ void countLetterOccurences() {
 	fprintf(stdout, "Letters verified = %d\n", countLetters);
 	fprintf(stdout, "Matches = %d\n", countMatches);
 	for(int i=0; i<countMatches; i++) {
-		fprintf(stdout, "  Match #%d: %d %d %d %d -> corr = %lf\n", i, matches[i].xStart, matches[i].xEnd, matches[i].yStart, matches[i].yEnd, matches[i].correlation);
+		fprintf(stdout, "  Match #%d: %d %d %d %d -> corr = %lf\n", (i+1), matches[i].xStart, matches[i].xEnd, matches[i].yStart, matches[i].yEnd, matches[i].correlation);
 		drawBox(&image, matches[i].xStart, matches[i].xEnd, matches[i].yStart, matches[i].yEnd);
 	}
 	writePGM(image, "process_out.pgm");
@@ -386,7 +389,7 @@ int main(int argc, char** argv) {
 		   			"  1 - test threshold on image\n"
 		   			"  2 - correlate 2 images\n"
 		   			"  3 - search for best threshold value\n"
-		   			"  4 - count occurences of a letter in a page\n\n"
+		   			"  4 - count occurrences of a letter in a page\n\n"
 		   			"  0 - EXIT\n\n"
 		   			"Answer: ");
 
