@@ -370,7 +370,7 @@ void countLetterOccurences() {
 	fprintf(stdout, "Letters verified = %d\n", countLetters);
 	fprintf(stdout, "Matches = %d\n", countMatches);
 	for(int i=0; i<countMatches; i++) {
-		fprintf(stdout, "  Match #%d: %d %d %d %d -> corr = %lf\n", i, matches[i].xStart, matches[i].xEnd, matches[i].yStart, matches[i].yEnd, matches[i].correlation);
+		fprintf(stdout, "  Match #%d: %d %d %d %d -> corr = %lf\n", (i+1), matches[i].xStart, matches[i].xEnd, matches[i].yStart, matches[i].yEnd, matches[i].correlation);
 		drawBox(&image, matches[i].xStart, matches[i].xEnd, matches[i].yStart, matches[i].yEnd);
 	}
 	writePGM(image, "process_out.pgm");
